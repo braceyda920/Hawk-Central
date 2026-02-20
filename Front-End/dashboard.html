@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Dashboard – Hawk Central</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #F5C518;
+      --gold-dark: #D4A900;
+      --black: #111111;
+      --white: #FFFFFF;
+      --gray-bg: #F3F3F3;
+      --gray-light: #E8E8E8;
+      --gray-text: #666666;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--gray-bg);
+      color: var(--black);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--black);
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      height: 70px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      gap: 24px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      margin-right: auto;
+    }
+
+    .nav-logo {
+      width: 44px;
+      height: 44px;
+      background: var(--gold);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 24px;
+      color: var(--black);
+    }
+
+    .nav-title span:first-child {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      color: var(--gold);
+      letter-spacing: 1px;
+      line-height: 1;
+      display: block;
+    }
+
+    .nav-title span:last-child {
+      font-size: 11px;
+      color: #888;
+      letter-spacing: 0.5px;
+      display: block;
+    }
+
+    .nav-link {
+      color: var(--gold);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .nav-link:hover { background: rgba(245,197,24,0.1); }
+    .nav-link.active { background: var(--gold); color: var(--black); }
+
+    .btn-outline {
+      border: 2px solid var(--gold);
+      color: var(--gold);
+      background: transparent;
+      padding: 7px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .btn-outline:hover { background: var(--gold); color: var(--black); }
+
+    /* ── PAGE LAYOUT ── */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 36px 24px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .page-header h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px;
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+
+    .page-header p { color: var(--gray-text); font-size: 14px; margin-top: 4px; }
+
+    .btn-gold {
+      background: var(--gold);
+      color: var(--black);
+      border: none;
+      padding: 12px 22px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-gold:hover { background: var(--gold-dark); }
+
+    /* ── STAT CARDS ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 22px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-left: 4px solid var(--gold);
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--gold);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .stat-number {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      line-height: 1;
+      color: var(--black);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--gray-text);
+      margin-top: 2px;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--white);
+      padding: 6px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      width: fit-content;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .tab-btn {
+      padding: 9px 20px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--gray-text);
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--gold);
+      color: var(--black);
+    }
+
+    /* ── SEARCH ── */
+    .search-wrap {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+    }
+
+    #dashSearch {
+      width: 100%;
+      padding: 13px 16px 13px 44px;
+      border: 2px solid var(--gray-light);
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+      background: var(--white);
+    }
+
+    #dashSearch:focus { border-color: var(--gold); }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      background: var(--white);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      background: var(--black);
+    }
+
+    thead th {
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--gray-light);
+      transition: background 0.15s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafafa; }
+
+    tbody td {
+      padding: 16px 20px;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    .td-title { font-weight: 700; color: var(--black); }
+
+    .category-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .td-actions { display: flex; gap: 8px; }
+
+    .btn-edit {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: none;
+      background: #e3f0ff;
+      color: #1565c0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      transition: background 0.2s;
+    }
+
+    .btn-edit:hover { background: #bbdefb; }
+
+    .btn-delete {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: none;
+      background: #ffeaea;
+      color: #c62828;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      transition: background 0.2s;
+    }
+
+    .btn-delete:hover { background: #ffcdd2; }
+
+    /* ── RSVP CARDS ── */
+    .rsvp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .rsvp-card {
+      background: var(--white);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-left: 4px solid var(--gold);
+      animation: fadeUp 0.3s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .rsvp-card-title { font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+
+    .rsvp-card-meta {
+      font-size: 13px;
+      color: var(--gray-text);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* ── EMPTY ── */
+    .empty-state {
+      text-align: center;
+      padding: 56px 24px;
+      color: var(--gray-text);
+    }
+
+    .empty-state .icon { font-size: 44px; margin-bottom: 14px; }
+    .empty-state h3 { font-size: 17px; font-weight: 700; color: var(--black); margin-bottom: 6px; }
+
+    /* ── NOT LOGGED IN ── */
+    .gate {
+      text-align: center;
+      padding: 80px 24px;
+    }
+
+    .gate .icon { font-size: 56px; margin-bottom: 20px; }
+    .gate h2 { font-family: 'Bebas Neue', sans-serif; font-size: 32px; margin-bottom: 8px; }
+    .gate p { color: var(--gray-text); margin-bottom: 24px; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 32px;
+      width: 100%;
+      max-width: 500px;
+      animation: modalIn 0.25s ease;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .modal h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .modal p { color: var(--gray-text); font-size: 14px; margin-bottom: 20px; }
+    .modal-close { float: right; background: none; border: none; font-size: 22px; cursor: pointer; color: #aaa; }
+
+    .form-group { margin-bottom: 14px; }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 2px solid var(--gray-light);
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--gold); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
+
+    .btn-cancel {
+      flex: 1;
+      padding: 11px;
+      border: 2px solid var(--gray-light);
+      background: transparent;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .btn-submit {
+      flex: 2;
+      padding: 11px;
+      background: var(--gold);
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.2s;
+    }
+
+    .btn-submit:hover { background: var(--gold-dark); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--black);
+      color: var(--white);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      display: none;
+      z-index: 300;
+    }
+
+    .toast.show { display: block; }
+
+    @media (max-width: 640px) {
+      .stats-row { grid-template-columns: 1fr; }
+      thead th:nth-child(3), tbody td:nth-child(3),
+      thead th:nth-child(4), tbody td:nth-child(4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-brand" href="index.html">
+    <div class="nav-logo">H</div>
+    <div class="nav-title">
+      <span>HAWK CENTRAL</span>
+      <span>Campus Events</span>
+    </div>
+  </a>
+  <a href="index.html" class="nav-link">Events</a>
+  <a href="dashboard.html" class="nav-link active">My Dashboard</a>
+  <span id="navUser" style="color:#888; font-size:13px;"></span>
+  <button class="btn-outline" onclick="logout()">Logout</button>
+</nav>
+
+<!-- ── PAGE ── -->
+<div class="page" id="pageContent">
+  <!-- shown if not logged in -->
+  <div class="gate" id="gateMsg">
+    <div class="icon">🔒</div>
+    <h2>Sign In Required</h2>
+    <p>You need to be logged in to view your dashboard.</p>
+    <button class="btn-gold" onclick="window.location.href='index.html'">Go to Home Page</button>
+  </div>
+</div>
+
+<!-- ── EVENT MODAL ── -->
+<div class="modal-overlay" id="eventModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('eventModal')">✕</button>
+    <h2 id="modalTitle">Add New Event</h2>
+    <p id="modalSubtitle">Fill in the details to post your event</p>
+    <div class="form-group">
+      <label>Event Title</label>
+      <input type="text" id="evTitle" placeholder="e.g. Study Group – CS 201"/>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="evDescription" rows="3" placeholder="What's this event about?"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="evDate"/>
+      </div>
+      <div class="form-group">
+        <label>Start Time</label>
+        <input type="time" id="evStartTime"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category</label>
+        <select id="evCategory"><option value="">Select...</option></select>
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <select id="evLocation"><option value="">Select...</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Organizer</label>
+        <input type="text" id="evOrganizer" placeholder="Your name or club"/>
+      </div>
+      <div class="form-group">
+        <label>Max Capacity</label>
+        <input type="number" id="evCapacity" placeholder="e.g. 50"/>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('eventModal')">Cancel</button>
+      <button class="btn-submit" onclick="handleSaveEvent()">Save Event</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = 'http://localhost:3000';
+  let currentUser = JSON.parse(localStorage.getItem('hc_user') || 'null');
+  let myEvents = [];
+  let myRsvps = [];
+  let activeTab = 'my-events';
+  let editingEventId = null;
+  let searchTerm = '';
+
+  const CATEGORY_COLORS = {
+    'sports & recreation': { bg: '#fff3e0', color: '#e65100' },
+    'academic & study':    { bg: '#e3f2fd', color: '#1565c0' },
+    'social & networking': { bg: '#f3e5f5', color: '#6a1b9a' },
+    'clubs & organizations':{ bg: '#e8f5e9', color: '#2e7d32' },
+    'career & professional':{ bg: '#eceff1', color: '#37474f' },
+    'arts & culture':      { bg: '#fce4ec', color: '#880e4f' },
+  };
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (!currentUser) return; // gate stays visible
+    document.getElementById('gateMsg').style.display = 'none';
+    document.getElementById('navUser').textContent = `${currentUser.first_name} ${currentUser.last_name}`;
+    buildDashboard();
+    loadCategories();
+    loadLocations();
+  });
+
+  async function buildDashboard() {
+    // Fetch all events and filter by created_by
+    try {
+      const res = await fetch(`${API}/events`);
+      const all = await res.json();
+      // Sort newest first for the table (most recent event_date at top)
+      myEvents = all
+        .filter(e => e.created_by === currentUser.user_id)
+        .sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
+    } catch { myEvents = []; }
+
+    // Fetch RSVPs — we'll just show all events user has RSVP'd to
+    // (using a simple workaround since we don't have a /my-rsvps endpoint yet)
+    myRsvps = [];
+
+    renderPage();
+  }
+
+  function renderPage() {
+    const container = document.getElementById('pageContent');
+
+    const totalRsvps = myEvents.reduce((sum, e) => sum + (parseInt(e.rsvp_count) || 0), 0);
+    const avgRsvps = myEvents.length ? Math.round(totalRsvps / myEvents.length) : 0;
+
+    container.innerHTML = `
+      <div class="page-header">
+        <div>
+          <h1>My Dashboard</h1>
+          <p>Welcome back, ${currentUser.first_name}! Manage your events and RSVPs.</p>
+        </div>
+        <button class="btn-gold" onclick="openModal('eventModal')">+ Add New Event</button>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div>
+            <div class="stat-number" id="statEvents">${myEvents.length}</div>
+            <div class="stat-label">My Events</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div>
+            <div class="stat-number" id="statRsvps">${totalRsvps}</div>
+            <div class="stat-label">Total RSVPs</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📊</div>
+          <div>
+            <div class="stat-number" id="statAvg">${avgRsvps}</div>
+            <div class="stat-label">Avg RSVPs / Event</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab-btn ${activeTab === 'my-events' ? 'active' : ''}"
+          onclick="switchTab('my-events')">My Events</button>
+        <button class="tab-btn ${activeTab === 'my-rsvps' ? 'active' : ''}"
+          onclick="switchTab('my-rsvps')">My RSVPs</button>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="dashSearch" placeholder="Search events..." oninput="handleSearch(this.value)"/>
+      </div>
+
+      <!-- TAB CONTENT -->
+      <div id="tabContent"></div>
+    `;
+
+    renderTabContent();
+  }
+
+  function renderTabContent() {
+    const container = document.getElementById('tabContent');
+    if (!container) return;
+
+    if (activeTab === 'my-events') {
+      renderMyEventsTable(container);
+    } else {
+      renderMyRsvps(container);
+    }
+  }
+
+  function renderMyEventsTable(container) {
+    let events = myEvents;
+    if (searchTerm) {
+      const s = searchTerm.toLowerCase();
+      events = events.filter(e =>
+        e.title.toLowerCase().includes(s) ||
+        (e.category_name || '').toLowerCase().includes(s) ||
+        (e.location_name || '').toLowerCase().includes(s)
+      );
+    }
+
+    if (events.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📭</div>
+          <h3>${searchTerm ? 'No matching events' : "You haven't created any events yet"}</h3>
+          <p>${searchTerm ? 'Try a different search' : 'Click "+ Add New Event" to get started'}</p>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Event Name</th>
+              <th>Date</th>
+              <th>Category</th>
+              <th>Location</th>
+              <th>RSVPs</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${events.map(e => {
+              const catKey = (e.category_name || '').toLowerCase();
+              const catStyle = CATEGORY_COLORS[catKey] || { bg: '#f5f5f5', color: '#555' };
+              return `
+                <tr>
+                  <td class="td-title">${e.title}</td>
+                  <td>${formatDate(e.event_date)}</td>
+                  <td>
+                    <span class="category-badge" style="background:${catStyle.bg}; color:${catStyle.color}">
+                      ${e.category_name || '—'}
+                    </span>
+                  </td>
+                  <td>${e.location_name || e.building_name || '—'}</td>
+                  <td><strong>${e.rsvp_count || 0}</strong></td>
+                  <td>
+                    <div class="td-actions">
+                      <button class="btn-edit" onclick="openEditEvent(${e.event_id})" title="Edit">✏️</button>
+                      <button class="btn-delete" onclick="deleteEvent(${e.event_id})" title="Delete">🗑️</button>
+                    </div>
+                  </td>
+                </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  function renderMyRsvps(container) {
+    if (myRsvps.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🎫</div>
+          <h3>No RSVPs yet</h3>
+          <p>Head to the <a href="index.html" style="color:var(--gold-dark);font-weight:600;">Events page</a> and RSVP to events you're interested in!</p>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = `<div class="rsvp-grid">${myRsvps.map((e, i) => `
+      <div class="rsvp-card" style="animation-delay:${i*0.05}s">
+        <div class="rsvp-card-title">${e.title}</div>
+        <div class="rsvp-card-meta">
+          <span>📅 ${formatDate(e.event_date)}</span>
+          <span>📍 ${e.location_name || '—'}</span>
+        </div>
+      </div>`).join('')}</div>`;
+  }
+
+  function switchTab(tab) {
+    activeTab = tab;
+    searchTerm = '';
+    renderPage();
+  }
+
+  function handleSearch(val) {
+    searchTerm = val;
+    renderTabContent();
+  }
+
+  // ── EVENT CRUD ──
+  async function loadCategories() {
+    try {
+      const res = await fetch(`${API}/categories`);
+      const cats = await res.json();
+      const sel = document.getElementById('evCategory');
+      cats.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.category_id;
+        opt.textContent = c.category_name;
+        sel.appendChild(opt);
+      });
+    } catch {}
+  }
+
+  async function loadLocations() {
+    try {
+      const res = await fetch(`${API}/locations`);
+      const locs = await res.json();
+      const sel = document.getElementById('evLocation');
+      locs.forEach(l => {
+        const opt = document.createElement('option');
+        opt.value = l.location_id;
+        opt.textContent = l.location_name;
+        sel.appendChild(opt);
+      });
+    } catch {}
+  }
+
+  function openEditEvent(eventId) {
+    const event = myEvents.find(e => e.event_id === eventId);
+    if (!event) return;
+    editingEventId = eventId;
+    document.getElementById('modalTitle').textContent = 'Edit Event';
+    document.getElementById('modalSubtitle').textContent = 'Update your event details';
+    document.getElementById('evTitle').value = event.title || '';
+    document.getElementById('evDescription').value = event.description || '';
+    document.getElementById('evDate').value = event.event_date ? event.event_date.slice(0,10) : '';
+    document.getElementById('evStartTime').value = event.start_time || '';
+    document.getElementById('evCategory').value = event.category_id || '';
+    document.getElementById('evLocation').value = event.location_id || '';
+    document.getElementById('evOrganizer').value = event.organizer_name || '';
+    document.getElementById('evCapacity').value = event.max_capacity || '';
+    openModal('eventModal');
+  }
+
+  async function handleSaveEvent() {
+    if (!currentUser) return;
+    const payload = {
+      title: document.getElementById('evTitle').value,
+      description: document.getElementById('evDescription').value,
+      event_date: document.getElementById('evDate').value,
+      start_time: document.getElementById('evStartTime').value,
+      category_id: document.getElementById('evCategory').value,
+      location_id: document.getElementById('evLocation').value,
+      organizer_name: document.getElementById('evOrganizer').value,
+      max_capacity: document.getElementById('evCapacity').value,
+      created_by: currentUser.user_id
+    };
+
+    try {
+      if (editingEventId) {
+        await fetch(`${API}/events/${editingEventId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...payload, user_id: currentUser.user_id, user_role: currentUser.role })
+        });
+        showToast('✅ Event updated!');
+      } else {
+        await fetch(`${API}/events`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        showToast('✅ Event created!');
+      }
+      closeModal('eventModal');
+      await buildDashboard();
+    } catch { showToast('❌ Could not save event'); }
+  }
+
+  async function deleteEvent(eventId) {
+    if (!confirm('Delete this event? This cannot be undone.')) return;
+    try {
+      await fetch(`${API}/events/${eventId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: currentUser.user_id, user_role: currentUser.role })
+      });
+      showToast('🗑️ Event deleted');
+      await buildDashboard();
+    } catch { showToast('❌ Could not delete event'); }
+  }
+
+  function logout() {
+    localStorage.removeItem('hc_user');
+    window.location.href = 'index.html';
+  }
+
+  function openModal(id) {
+    if (id === 'eventModal' && !editingEventId) {
+      document.getElementById('modalTitle').textContent = 'Add New Event';
+      document.getElementById('modalSubtitle').textContent = 'Fill in the details to post your event';
+      ['evTitle','evDescription','evDate','evStartTime','evOrganizer','evCapacity'].forEach(f => {
+        document.getElementById(f).value = '';
+      });
+    }
+    document.getElementById(id).classList.add('open');
+  }
+
+  function closeModal(id) {
+    editingEventId = null;
+    document.getElementById(id).classList.remove('open');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '—';
+    const d = new Date(dateStr + 'T12:00:00');
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) closeModal(overlay.id);
+    });
+  });
+</script>
+</body>
+</html>
