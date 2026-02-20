@@ -7,11 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --gold: #F5C518; --gold-dark: #D4A900; --black: #111111;
-      --white: #FFFFFF; --gray-bg: #F3F3F3; --gray-light: #E8E8E8;
-      --gray-text: #666666; --card-radius: 16px;
-    }
+    :root { --gold: #F5C518; --gold-dark: #D4A900; --black: #111111; --white: #FFFFFF; --gray-bg: #F3F3F3; --gray-light: #E8E8E8; --gray-text: #666666; --card-radius: 16px; }
     body { font-family: 'DM Sans', sans-serif; background: var(--gray-bg); color: var(--black); min-height: 100vh; }
 
     nav { background: var(--black); display: flex; align-items: center; padding: 0 32px; height: 70px; position: sticky; top: 0; z-index: 100; gap: 16px; }
@@ -196,7 +192,7 @@
   <div class="modal" style="max-width:540px;">
     <button class="modal-close" onclick="closeModal('eventModal')">✕</button>
     <h2 id="eventModalTitle">Add New Event</h2>
-    <p id="eventModalSubtitle">Fields marked <span class="required-star">*</span> are required</p>
+    <p>Fields marked <span class="required-star">*</span> are required</p>
     <div class="form-group"><label>Event Title <span class="required-star">*</span></label><input type="text" id="evTitle" placeholder="e.g. Spring Career Fair 2026"/></div>
     <div class="form-group"><label>Description <span class="required-star">*</span></label><textarea id="evDescription" rows="3" placeholder="What's this event about?"></textarea></div>
     <div class="form-row">
@@ -233,7 +229,7 @@
   let editingEventId = null;
   let myRsvpedEvents = JSON.parse(localStorage.getItem('hc_rsvps') || '[]');
 
-  window.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('DOMContentLoaded', function() {
     updateAuthUI();
     loadEvents();
     loadCategories();
@@ -260,75 +256,77 @@
 
   async function loadEvents() {
     try {
-      const res = await fetch(`${API}/events`);
+      const res = await fetch(API + '/events');
       allEvents = await res.json();
-      allEvents.sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
+      allEvents.sort(function(a, b) { return new Date(a.event_date) - new Date(b.event_date); });
       renderEvents();
     } catch {
-      document.getElementById('eventGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">⚠️</div><h3>Could not load events</h3><p>Make sure the server is running on localhost:3000</p></div>`;
+      document.getElementById('eventGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">⚠️</div><h3>Could not load events</h3><p>Make sure the server is running on localhost:3000</p></div>';
     }
   }
 
   function renderEvents() {
     const grid = document.getElementById('eventGrid');
     const label = document.getElementById('resultsLabel');
-    let filtered = [...allEvents];
+    let filtered = allEvents.slice();
 
     if (activeCategory !== 'all') {
-      filtered = filtered.filter(e => e.category_name && e.category_name.toLowerCase().includes(activeCategory.toLowerCase()));
+      filtered = filtered.filter(function(e) {
+        return e.category_name && e.category_name.toLowerCase().includes(activeCategory.toLowerCase());
+      });
     }
     if (searchTerm) {
       const s = searchTerm.toLowerCase();
-      filtered = filtered.filter(e =>
-        (e.title && e.title.toLowerCase().includes(s)) ||
-        (e.description && e.description.toLowerCase().includes(s)) ||
-        (e.location_name && e.location_name.toLowerCase().includes(s))
-      );
+      filtered = filtered.filter(function(e) {
+        return (e.title && e.title.toLowerCase().includes(s)) ||
+               (e.description && e.description.toLowerCase().includes(s)) ||
+               (e.location_name && e.location_name.toLowerCase().includes(s));
+      });
     }
 
-    label.textContent = `Showing ${filtered.length} upcoming event${filtered.length !== 1 ? 's' : ''}`;
+    label.textContent = 'Showing ' + filtered.length + ' upcoming event' + (filtered.length !== 1 ? 's' : '');
 
     if (filtered.length === 0) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">📭</div><h3>No events found</h3><p>Try a different search or filter</p></div>`;
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">📭</div><h3>No events found</h3><p>Try a different search or filter</p></div>';
       return;
     }
 
-    grid.innerHTML = filtered.map((e, i) => {
+    grid.innerHTML = filtered.map(function(e, i) {
       const isOwner = currentUser && currentUser.user_id === e.created_by;
       const isAdmin = currentUser && currentUser.role === 'super_admin';
       const alreadyRsvped = myRsvpedEvents.includes(e.event_id);
-      return `
-        <div class="event-card" style="animation-delay:${i*0.05}s">
-          <div class="card-banner">
-            <span class="card-category-tag">${e.category_name || 'Event'}</span>
-            ${getCategoryEmoji(e.category_name)}
-          </div>
-          <div class="card-body">
-            <div class="card-title">${e.title}</div>
-            ${e.description ? `<div class="card-description">${e.description}</div>` : ''}
-            <div class="card-meta">
-              <div class="card-meta-row"><span class="icon">📅</span><span>${formatDate(e.event_date, e.start_time)}</span></div>
-              <div class="card-meta-row"><span class="icon">📍</span><span>${e.location_name || e.building_name || 'TBD'}</span></div>
-              ${e.max_capacity ? `<div class="card-meta-row"><span class="icon">👥</span><span>Capacity: ${e.max_capacity}</span></div>` : ''}
-            </div>
-            <div class="card-footer">
-              <span class="rsvp-count">✅ ${e.rsvp_count || 0} going</span>
-              ${(isOwner || isAdmin) ? `
-                <div class="owner-actions">
-                  <button class="btn-edit" onclick="openEditEvent(${e.event_id})">✏️</button>
-                  <button class="btn-delete" onclick="deleteEvent(${e.event_id})">🗑️</button>
-                </div>` : `
-                <button class="btn-rsvp ${alreadyRsvped ? 'rsvped' : ''}" id="rsvpBtn_${e.event_id}" onclick="handleRSVP(${e.event_id}, this)">
-                  ${alreadyRsvped ? '✓ Going' : 'RSVP'}
-                </button>`}
-            </div>
-          </div>
-        </div>`;
+      return '<div class="event-card" style="animation-delay:' + (i * 0.05) + 's">' +
+        '<div class="card-banner">' +
+          '<span class="card-category-tag">' + (e.category_name || 'Event') + '</span>' +
+          getCategoryEmoji(e.category_name) +
+        '</div>' +
+        '<div class="card-body">' +
+          '<div class="card-title">' + e.title + '</div>' +
+          (e.description ? '<div class="card-description">' + e.description + '</div>' : '') +
+          '<div class="card-meta">' +
+            '<div class="card-meta-row"><span class="icon">📅</span><span>' + formatDate(e.event_date, e.start_time) + '</span></div>' +
+            '<div class="card-meta-row"><span class="icon">📍</span><span>' + (e.location_name || 'TBD') + '</span></div>' +
+            (e.max_capacity ? '<div class="card-meta-row"><span class="icon">👥</span><span>Capacity: ' + e.max_capacity + '</span></div>' : '') +
+          '</div>' +
+          '<div class="card-footer">' +
+            '<span class="rsvp-count">✅ ' + (e.rsvp_count || 0) + ' going</span>' +
+            ((isOwner || isAdmin) ?
+              '<div class="owner-actions">' +
+                '<button class="btn-edit" onclick="openEditEvent(' + e.event_id + ')">✏️</button>' +
+                '<button class="btn-delete" onclick="deleteEvent(' + e.event_id + ')">🗑️</button>' +
+              '</div>' :
+              '<button class="btn-rsvp ' + (alreadyRsvped ? 'rsvped' : '') + '" id="rsvpBtn_' + e.event_id + '" onclick="handleRSVP(' + e.event_id + ', this)">' +
+                (alreadyRsvped ? '✓ Going' : 'RSVP') +
+              '</button>'
+            ) +
+          '</div>' +
+        '</div>' +
+      '</div>';
     }).join('');
   }
 
   function setFilter(btn) {
-    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.filter-pill').forEach(function(p) { p.classList.remove('active'); });
     btn.classList.add('active');
     activeCategory = btn.dataset.category;
     renderEvents();
@@ -340,57 +338,52 @@
   }
 
   async function handleRSVP(eventId, btn) {
-    if (!currentUser) {
-      showToast('⚠️ Please log in to RSVP');
-      openModal('loginModal');
-      return;
-    }
-    if (myRsvpedEvents.includes(eventId)) {
-      showToast('You already RSVP\'d to this event!');
-      return;
-    }
+    if (!currentUser) { showToast('⚠️ Please log in to RSVP'); openModal('loginModal'); return; }
+    if (myRsvpedEvents.includes(eventId)) { showToast('You already RSVP\'d to this event!'); return; }
     try {
-      const res = await fetch(`${API}/rsvp`, {
+      const res = await fetch(API + '/rsvp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ event_id: eventId, user_id: currentUser.user_id, rsvp_status: 'attending' })
       });
       if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
       myRsvpedEvents.push(eventId);
       localStorage.setItem('hc_rsvps', JSON.stringify(myRsvpedEvents));
       updateRsvpBadge();
       btn.textContent = '✓ Going';
       btn.classList.add('rsvped');
-      const ev = allEvents.find(e => e.event_id === eventId);
-      if (ev) ev.rsvp_count = (parseInt(ev.rsvp_count) || 0) + 1;
+      const ev = allEvents.find(function(e) { return e.event_id === eventId; });
+      if (ev) ev.rsvp_count = data.rsvp_count;
+      // Update the count on the card
+      const footer = btn.closest('.card-footer');
+      if (footer) footer.querySelector('.rsvp-count').textContent = '✅ ' + data.rsvp_count + ' going';
       showToast('✅ RSVP confirmed!');
-    } catch (err) {
-      showToast('❌ RSVP failed: ' + err.message);
-    }
+    } catch (err) { showToast('❌ RSVP failed: ' + err.message); }
   }
 
   async function loadCategories() {
     try {
-      const res = await fetch(`${API}/categories`);
+      const res = await fetch(API + '/categories');
       const cats = await res.json();
       const sel = document.getElementById('evCategory');
-      cats.forEach(c => { const o = document.createElement('option'); o.value = c.category_id; o.textContent = c.category_name; sel.appendChild(o); });
-    } catch {}
+      cats.forEach(function(c) { const o = document.createElement('option'); o.value = c.category_id; o.textContent = c.category_name; sel.appendChild(o); });
+    } catch(e) {}
   }
 
   async function loadLocations() {
     try {
-      const res = await fetch(`${API}/locations`);
+      const res = await fetch(API + '/locations');
       const locs = await res.json();
       const sel = document.getElementById('evLocation');
-      locs.forEach(l => { const o = document.createElement('option'); o.value = l.location_id; o.textContent = l.location_name; sel.appendChild(o); });
-    } catch {}
+      locs.forEach(function(l) { const o = document.createElement('option'); o.value = l.location_id; o.textContent = l.location_name; sel.appendChild(o); });
+    } catch(e) {}
   }
 
   function validateEventForm() {
     let valid = true;
-    document.querySelectorAll('#eventModal input, #eventModal select, #eventModal textarea').forEach(el => el.classList.remove('error'));
-    [['evTitle','Title'],['evDescription','Description'],['evDate','Date'],['evStartTime','Start Time'],['evOrganizer','Organizer']].forEach(([id]) => {
+    document.querySelectorAll('#eventModal input, #eventModal select, #eventModal textarea').forEach(function(el) { el.classList.remove('error'); });
+    ['evTitle','evDescription','evDate','evStartTime','evOrganizer'].forEach(function(id) {
       const el = document.getElementById(id);
       if (!el.value.trim()) { el.classList.add('error'); valid = false; }
     });
@@ -418,20 +411,20 @@
     try {
       let res;
       if (editingEventId) {
-        res = await fetch(`${API}/events/${editingEventId}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({...payload, user_id: currentUser.user_id, user_role: currentUser.role}) });
+        res = await fetch(API + '/events/' + editingEventId, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(Object.assign({}, payload, {user_id: currentUser.user_id, user_role: currentUser.role})) });
         showToast('✅ Event updated!');
       } else {
-        res = await fetch(`${API}/events`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+        res = await fetch(API + '/events', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
         showToast('✅ Event created!');
       }
       if (!res.ok) { showToast('❌ ' + await res.text()); return; }
       closeModal('eventModal');
       await loadEvents();
-    } catch { showToast('❌ Could not save event'); }
+    } catch(e) { showToast('❌ Could not save event'); }
   }
 
   function openEditEvent(eventId) {
-    const e = allEvents.find(ev => ev.event_id === eventId);
+    const e = allEvents.find(function(ev) { return ev.event_id === eventId; });
     if (!e) return;
     editingEventId = eventId;
     document.getElementById('eventModalTitle').textContent = 'Edit Event';
@@ -449,10 +442,10 @@
   async function deleteEvent(eventId) {
     if (!confirm('Delete this event? This cannot be undone.')) return;
     try {
-      await fetch(`${API}/events/${eventId}`, { method: 'DELETE', headers: {'Content-Type':'application/json'}, body: JSON.stringify({user_id: currentUser.user_id, user_role: currentUser.role}) });
+      await fetch(API + '/events/' + eventId, { method: 'DELETE', headers: {'Content-Type':'application/json'}, body: JSON.stringify({user_id: currentUser.user_id, user_role: currentUser.role}) });
       showToast('🗑️ Event deleted');
       await loadEvents();
-    } catch { showToast('❌ Could not delete event'); }
+    } catch(e) { showToast('❌ Could not delete event'); }
   }
 
   async function handleLogin() {
@@ -460,15 +453,15 @@
     const password = document.getElementById('loginPassword').value;
     if (!email || !password) { showToast('⚠️ Please enter email and password'); return; }
     try {
-      const res = await fetch(`${API}/login`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email, password}) });
+      const res = await fetch(API + '/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email, password}) });
       if (!res.ok) { showToast('❌ ' + await res.text()); return; }
       currentUser = await res.json();
       localStorage.setItem('hc_user', JSON.stringify(currentUser));
       closeModal('loginModal');
       updateAuthUI();
       renderEvents();
-      showToast(`👋 Welcome back, ${currentUser.first_name}!`);
-    } catch { showToast('❌ Login failed — is the server running?'); }
+      showToast('👋 Welcome back, ' + currentUser.first_name + '!');
+    } catch(e) { showToast('❌ Login failed — is the server running?'); }
   }
 
   async function handleSignup() {
@@ -478,14 +471,14 @@
     const password = document.getElementById('signupPassword').value;
     if (!first || !last || !email || !password) { showToast('⚠️ Please fill in all required fields'); return; }
     try {
-      const res = await fetch(`${API}/signup`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email, password, first_name: first, last_name: last, student_id: document.getElementById('signupStudentId').value, graduation_year: document.getElementById('signupGradYear').value || null, major: document.getElementById('signupMajor').value}) });
+      const res = await fetch(API + '/signup', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email, password, first_name: first, last_name: last, student_id: document.getElementById('signupStudentId').value, graduation_year: document.getElementById('signupGradYear').value || null, major: document.getElementById('signupMajor').value}) });
       if (!res.ok) { showToast('❌ ' + await res.text()); return; }
       currentUser = await res.json();
       localStorage.setItem('hc_user', JSON.stringify(currentUser));
       closeModal('signupModal');
       updateAuthUI();
-      showToast(`🎉 Welcome to Hawk Central, ${currentUser.first_name}!`);
-    } catch { showToast('❌ Signup failed'); }
+      showToast('🎉 Welcome to Hawk Central, ' + currentUser.first_name + '!');
+    } catch(e) { showToast('❌ Signup failed'); }
   }
 
   function logout() {
@@ -502,7 +495,7 @@
   function openModal(id) {
     if (id === 'eventModal' && !editingEventId) {
       document.getElementById('eventModalTitle').textContent = 'Add New Event';
-      ['evTitle','evDescription','evDate','evStartTime','evOrganizer','evCapacity'].forEach(f => document.getElementById(f).value = '');
+      ['evTitle','evDescription','evDate','evStartTime','evOrganizer','evCapacity'].forEach(function(f) { document.getElementById(f).value = ''; });
       document.getElementById('evCategory').value = '';
       document.getElementById('evLocation').value = '';
     }
@@ -512,7 +505,7 @@
   function closeModal(id) {
     editingEventId = null;
     document.getElementById(id).classList.remove('open');
-    document.querySelectorAll('#eventModal input, #eventModal select, #eventModal textarea').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('#eventModal input, #eventModal select, #eventModal textarea').forEach(function(el) { el.classList.remove('error'); });
   }
 
   function switchModal(from, to) { closeModal(from); openModal(to); }
@@ -520,18 +513,21 @@
   function showToast(msg) {
     const t = document.getElementById('toast');
     t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3500);
+    t.className = 'toast show';
+    setTimeout(function() { t.className = 'toast'; }, 3500);
   }
 
   function formatDate(dateStr, timeStr) {
     if (!dateStr) return 'TBD';
-    const d = new Date(dateStr + 'T12:00:00');
-    const date = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
-    if (!timeStr) return date;
-    const [h, m] = timeStr.split(':');
-    const hour = parseInt(h);
-    return `${date} • ${hour % 12 || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
+    var d = dateStr.slice(0, 10);
+    var parts = d.split('-');
+    var date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    var dateFormatted = date.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+    if (!timeStr) return dateFormatted;
+    var timeParts = timeStr.split(':');
+    var hour = parseInt(timeParts[0]);
+    var min = timeParts[1];
+    return dateFormatted + ' • ' + (hour % 12 || 12) + ':' + min + ' ' + (hour >= 12 ? 'PM' : 'AM');
   }
 
   function getCategoryEmoji(cat) {
@@ -546,7 +542,9 @@
     return '📅';
   }
 
-  document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
+  document.querySelectorAll('.modal-overlay').forEach(function(o) {
+    o.addEventListener('click', function(e) { if (e.target === o) o.classList.remove('open'); });
+  });
 </script>
 </body>
 </html>
