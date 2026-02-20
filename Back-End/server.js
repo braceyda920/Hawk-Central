@@ -3,19 +3,29 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto'); // NEW: for password reset tokens
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 // ==================== APP SETUP ====================
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ================== DATABASE SETUP ==================
+// ==================== EMAIL SETUP ====================
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'braceyda920@gmail.com',   // your Gmail
+    pass: 'pufmhasvjolswfpz',        // your app password (no spaces)
+  }
+});
+
+// ==================== DATABASE SETUP ====================
 const pool = new Pool({
-  user: 'treybracey',         // <-- your Postgres username
+  user: 'treybracey',
   host: 'localhost',
-  database: 'hawk_central',   // FIX: was 'hawk_central_db', now matches your actual DB name
-  password: 'SecurePassword123!', // <-- your Postgres password
+  database: 'hawk_central',
+  password: 'SecurePassword123!',    // your postgres password
   port: 5432,
 });
 
@@ -23,57 +33,50 @@ pool.connect()
   .then(() => console.log('✅ PostgreSQL connected'))
   .catch(err => console.error('❌ PostgreSQL connection error', err));
 
-
-// ================== HELPER ====================
-// Checks if the logged-in user owns the event OR is a super_admin
-// Usage: call this before allowing edit/delete
+// ==================== HELPER ====================
 async function canModifyEvent(userId, userRole, eventId) {
   if (userRole === 'super_admin') return true;
   const result = await pool.query(
-    'SELECT created_by FROM events WHERE event_id=$1',
-    [eventId]
+    'SELECT created_by FROM events WHERE event_id=$1', [eventId]
   );
   if (!result.rows[0]) return false;
-  return result.rows[0].created_by === userId;
+  return result.rows[0].created_by === parseInt(userId);
 }
 
+// ==================== ROUTES ====================
 
-// ================== ROUTES ==================
-
-// Root route
 app.get('/', (req, res) => {
   res.send('🚀 Hawk Central Server is running');
 });
 
 // ---------------- EVENTS --------------------
 
-// Get all public events
-// NEW: supports ?category=Sports&search=basketball filtering
 app.get('/events', async (req, res) => {
   try {
     const { category, search } = req.query;
-
     let query = `
-      SELECT e.*, c.category_name, c.color as category_color, l.location_name, l.building_name
+      SELECT e.*,
+             c.category_name, c.color as category_color,
+             l.location_name, l.building_name,
+             COUNT(ea.user_id) FILTER (WHERE ea.rsvp_status = 'attending') as rsvp_count
       FROM events e
       JOIN categories c ON e.category_id = c.category_id
       JOIN locations l ON e.location_id = l.location_id
+      LEFT JOIN event_attendees ea ON e.event_id = ea.event_id
       WHERE e.is_active = TRUE AND e.is_public = TRUE
     `;
     const params = [];
 
-    // Filter by category name if provided
     if (category) {
-      params.push(category);
+      params.push(`%${category}%`);
       query += ` AND c.category_name ILIKE $${params.length}`;
     }
-
-    // Search by title or description if provided
     if (search) {
       params.push(`%${search}%`);
       query += ` AND (e.title ILIKE $${params.length} OR e.description ILIKE $${params.length})`;
     }
 
+    query += ' GROUP BY e.event_id, c.category_name, c.color, l.location_name, l.building_name';
     query += ' ORDER BY e.event_date ASC';
 
     const result = await pool.query(query, params);
@@ -84,15 +87,17 @@ app.get('/events', async (req, res) => {
   }
 });
 
-// Get single event by id
 app.get('/events/:id', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT e.*, c.category_name, c.color as category_color, l.location_name, l.building_name
+      `SELECT e.*, c.category_name, c.color as category_color, l.location_name, l.building_name,
+              COUNT(ea.user_id) FILTER (WHERE ea.rsvp_status = 'attending') as rsvp_count
        FROM events e
        JOIN categories c ON e.category_id = c.category_id
        JOIN locations l ON e.location_id = l.location_id
-       WHERE e.event_id=$1`,
+       LEFT JOIN event_attendees ea ON e.event_id = ea.event_id
+       WHERE e.event_id=$1
+       GROUP BY e.event_id, c.category_name, c.color, l.location_name, l.building_name`,
       [req.params.id]
     );
     if (!result.rows[0]) return res.status(404).send('Event not found');
@@ -103,8 +108,6 @@ app.get('/events/:id', async (req, res) => {
   }
 });
 
-// Create new event
-// Any logged-in user can create — created_by links it to them
 app.post('/events', async (req, res) => {
   try {
     const {
@@ -116,11 +119,11 @@ app.post('/events', async (req, res) => {
     const result = await pool.query(
       `INSERT INTO events
         (title, description, event_date, start_time, end_time, location_id,
-         category_id, organizer_name, contact_email, max_capacity, created_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+         category_id, organizer_name, contact_email, max_capacity, created_by, is_public, is_active)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11, TRUE, TRUE)
        RETURNING *`,
-      [title, description, event_date, start_time, end_time, location_id,
-       category_id, organizer_name, contact_email, max_capacity, created_by]
+      [title, description, event_date, start_time, end_time || null, location_id,
+       category_id, organizer_name, contact_email || null, max_capacity || null, created_by]
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -129,8 +132,6 @@ app.post('/events', async (req, res) => {
   }
 });
 
-// Edit event
-// NEW: only the event owner OR super_admin can edit
 app.put('/events/:id', async (req, res) => {
   try {
     const { user_id, user_role, title, description, event_date, start_time,
@@ -143,10 +144,9 @@ app.put('/events/:id', async (req, res) => {
       `UPDATE events SET
         title=$1, description=$2, event_date=$3, start_time=$4, end_time=$5,
         location_id=$6, category_id=$7, organizer_name=$8, contact_email=$9, max_capacity=$10
-       WHERE event_id=$11
-       RETURNING *`,
-      [title, description, event_date, start_time, end_time,
-       location_id, category_id, organizer_name, contact_email, max_capacity, req.params.id]
+       WHERE event_id=$11 RETURNING *`,
+      [title, description, event_date, start_time, end_time || null,
+       location_id, category_id, organizer_name, contact_email || null, max_capacity || null, req.params.id]
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -155,15 +155,11 @@ app.put('/events/:id', async (req, res) => {
   }
 });
 
-// Delete event
-// NEW: only the event owner OR super_admin can delete
 app.delete('/events/:id', async (req, res) => {
   try {
     const { user_id, user_role } = req.body;
-
     const allowed = await canModifyEvent(user_id, user_role, req.params.id);
     if (!allowed) return res.status(403).send('You do not have permission to delete this event');
-
     await pool.query('DELETE FROM events WHERE event_id=$1', [req.params.id]);
     res.send('Event deleted');
   } catch (err) {
@@ -196,27 +192,6 @@ app.get('/locations', async (req, res) => {
   }
 });
 
-// ---------------- SEARCH --------------------
-// NOTE: search is now built into GET /events?search=keyword
-// Keeping this route so nothing breaks if it's already being called
-app.get('/search/:keyword', async (req, res) => {
-  try {
-    const result = await pool.query(
-      `SELECT e.*, c.category_name, l.building_name
-       FROM events e
-       JOIN categories c ON e.category_id = c.category_id
-       JOIN locations l ON e.location_id = l.location_id
-       WHERE e.title ILIKE '%' || $1 || '%'
-       AND e.is_active=TRUE`,
-      [req.params.keyword]
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error searching events');
-  }
-});
-
 // ---------------- RSVP --------------------
 
 app.post('/rsvp', async (req, res) => {
@@ -229,19 +204,45 @@ app.post('/rsvp', async (req, res) => {
        DO UPDATE SET rsvp_status=$3`,
       [event_id, user_id, rsvp_status]
     );
-    res.send('RSVP saved');
+    // Return updated RSVP count
+    const countResult = await pool.query(
+      `SELECT COUNT(*) as rsvp_count FROM event_attendees WHERE event_id=$1 AND rsvp_status='attending'`,
+      [event_id]
+    );
+    res.json({ success: true, rsvp_count: parseInt(countResult.rows[0].rsvp_count) });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error saving RSVP');
   }
 });
 
-// Get RSVP count for an event (useful for displaying on event cards)
+// Get all RSVPs for a specific user
+app.get('/rsvp/user/:user_id', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT e.*, c.category_name, l.location_name, ea.rsvp_status,
+              COUNT(ea2.user_id) FILTER (WHERE ea2.rsvp_status = 'attending') as rsvp_count
+       FROM event_attendees ea
+       JOIN events e ON ea.event_id = e.event_id
+       JOIN categories c ON e.category_id = c.category_id
+       JOIN locations l ON e.location_id = l.location_id
+       LEFT JOIN event_attendees ea2 ON e.event_id = ea2.event_id
+       WHERE ea.user_id = $1 AND ea.rsvp_status = 'attending'
+       GROUP BY e.event_id, c.category_name, l.location_name, ea.rsvp_status
+       ORDER BY e.event_date ASC`,
+      [req.params.user_id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching user RSVPs');
+  }
+});
+
 app.get('/rsvp/:event_id/count', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT COUNT(*) FROM event_attendees
-       WHERE event_id=$1 AND rsvp_status='attending'`,
+      `SELECT COUNT(*) FROM event_attendees WHERE event_id=$1 AND rsvp_status='attending'`,
       [req.params.event_id]
     );
     res.json({ count: parseInt(result.rows[0].count) });
@@ -257,9 +258,7 @@ app.post('/save', async (req, res) => {
   try {
     const { user_id, event_id } = req.body;
     await pool.query(
-      `INSERT INTO saved_events (user_id, event_id)
-       VALUES ($1, $2)
-       ON CONFLICT DO NOTHING`,
+      `INSERT INTO saved_events (user_id, event_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
       [user_id, event_id]
     );
     res.send('Event saved');
@@ -275,15 +274,12 @@ app.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const result = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
-
     if (result.rows.length === 0) return res.status(401).send('User not found');
 
     const user = result.rows[0];
     const match = await bcrypt.compare(password, user.password_hash);
-
     if (!match) return res.status(401).send('Incorrect password');
 
-    // Return user info — role will be 'normal_user' or 'super_admin'
     res.json({
       user_id: user.user_id,
       first_name: user.first_name,
@@ -302,18 +298,15 @@ app.post('/login', async (req, res) => {
 app.post('/signup', async (req, res) => {
   try {
     const { email, password, first_name, last_name, student_id, major, graduation_year } = req.body;
-
-    // Check if email already exists
     const existing = await pool.query('SELECT user_id FROM users WHERE email=$1', [email]);
     if (existing.rows.length > 0) return res.status(400).send('Email already registered');
 
     const password_hash = await bcrypt.hash(password, 12);
-
     const result = await pool.query(
       `INSERT INTO users (email, password_hash, first_name, last_name, role, student_id, major, graduation_year)
        VALUES ($1, $2, $3, $4, 'normal_user', $5, $6, $7)
        RETURNING user_id, email, first_name, last_name, role`,
-      [email, password_hash, first_name, last_name, student_id, major, graduation_year]
+      [email, password_hash, first_name, last_name, student_id || null, major || null, graduation_year || null]
     );
     res.json(result.rows[0]);
   } catch (err) {
@@ -323,50 +316,80 @@ app.post('/signup', async (req, res) => {
 });
 
 // ---------------- PASSWORD RESET --------------------
-// NEW: Replaces the IT Admin group role
 
-// Step 1: Request a reset token (in production this would email the link)
 app.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
+
+    const userResult = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
+    if (userResult.rows.length === 0) {
+      return res.json({ message: 'If that email exists, a reset link has been sent.' });
+    }
+
     const token = crypto.randomBytes(32).toString('hex');
-    const expiry = new Date(Date.now() + 3600000); // token valid for 1 hour
+    const expiry = new Date(Date.now() + 3600000);
 
     await pool.query(
       'UPDATE users SET reset_token=$1, reset_token_expiry=$2 WHERE email=$3',
       [token, expiry, email]
     );
 
-    // TODO: Send email with link like: http://localhost:3000/reset-password?token=TOKEN
-    // For now, returning token directly so you can test it
-    console.log(`🔑 Reset token for ${email}: ${token}`);
-    res.json({ message: 'Reset token generated', token }); // remove token from response in production
+    const resetLink = `http://127.0.0.1:5500/Front-End/forgot-password.html?token=${token}`;
+
+    await transporter.sendMail({
+      from: '"Hawk Central" <braceyda920@gmail.com>',
+      to: email,
+      subject: 'Hawk Central — Reset Your Password',
+      html: `
+        <div style="font-family:sans-serif; max-width:480px; margin:0 auto;">
+          <div style="background:#111111; padding:24px; border-radius:12px 12px 0 0; text-align:center;">
+            <h1 style="color:#F5C518; margin:0; font-size:28px; letter-spacing:2px;">HAWK CENTRAL</h1>
+            <p style="color:#888; margin:4px 0 0; font-size:13px;">Campus Events</p>
+          </div>
+          <div style="background:#ffffff; padding:32px; border-radius:0 0 12px 12px; border:1px solid #eee;">
+            <h2 style="margin-bottom:8px;">Reset Your Password</h2>
+            <p style="color:#666; margin-bottom:24px; line-height:1.5;">
+              We received a request to reset your Hawk Central password.
+              Click the button below to choose a new one. This link expires in <strong>1 hour</strong>.
+            </p>
+            <a href="${resetLink}"
+               style="display:block; background:#F5C518; color:#111111; text-decoration:none;
+                      padding:16px; border-radius:10px; font-weight:700; text-align:center;
+                      font-size:16px; font-family:sans-serif;">
+              Reset My Password
+            </a>
+            <p style="color:#aaa; font-size:12px; margin-top:24px; text-align:center;">
+              If you didn't request a password reset, you can safely ignore this email.
+            </p>
+          </div>
+        </div>
+      `
+    });
+
+    console.log(`✅ Reset email sent to ${email}`);
+    res.json({ message: 'Reset link sent!' });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Error generating reset token');
+    console.error('❌ Email error:', err);
+    res.status(500).send('Error sending reset email');
   }
 });
 
-// Step 2: Use the token to set a new password
 app.post('/reset-password', async (req, res) => {
   try {
     const { token, new_password } = req.body;
-
     const result = await pool.query(
       'SELECT * FROM users WHERE reset_token=$1 AND reset_token_expiry > NOW()',
       [token]
     );
-
     if (result.rows.length === 0) return res.status(400).send('Invalid or expired reset token');
 
     const password_hash = await bcrypt.hash(new_password, 12);
-
     await pool.query(
       'UPDATE users SET password_hash=$1, reset_token=NULL, reset_token_expiry=NULL WHERE user_id=$2',
       [password_hash, result.rows[0].user_id]
     );
-
-    res.send('Password reset successful');
+    res.json({ message: 'Password reset successful' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error resetting password');
@@ -391,7 +414,7 @@ app.get('/featured', async (req, res) => {
   }
 });
 
-// ================== START SERVER ==================
+// ==================== START SERVER ====================
 
 const PORT = 3000;
 app.listen(PORT, () => {

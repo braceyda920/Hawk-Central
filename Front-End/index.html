@@ -7,742 +7,212 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --gold: #F5C518;
-      --gold-dark: #D4A900;
-      --black: #111111;
-      --white: #FFFFFF;
-      --gray-bg: #F3F3F3;
-      --gray-light: #E8E8E8;
-      --gray-text: #666666;
-      --card-radius: 16px;
+      --gold: #F5C518; --gold-dark: #D4A900; --black: #111111;
+      --white: #FFFFFF; --gray-bg: #F3F3F3; --gray-light: #E8E8E8;
+      --gray-text: #666666; --card-radius: 16px;
     }
+    body { font-family: 'DM Sans', sans-serif; background: var(--gray-bg); color: var(--black); min-height: 100vh; }
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--gray-bg);
-      color: var(--black);
-      min-height: 100vh;
-    }
-
-    /* ── NAV ── */
-    nav {
-      background: var(--black);
-      display: flex;
-      align-items: center;
-      padding: 0 32px;
-      height: 70px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      gap: 24px;
-    }
-
-    .nav-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      margin-right: auto;
-    }
-
-    .nav-logo {
-      width: 44px;
-      height: 44px;
-      background: var(--gold);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 24px;
-      color: var(--black);
-      font-weight: 700;
-    }
-
-    .nav-title {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .nav-title span:first-child {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 22px;
-      color: var(--gold);
-      letter-spacing: 1px;
-      line-height: 1;
-    }
-
-    .nav-title span:last-child {
-      font-size: 11px;
-      color: #888;
-      letter-spacing: 0.5px;
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .nav-link {
-      color: var(--gold);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-      padding: 8px 16px;
-      border-radius: 8px;
-      transition: background 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    nav { background: var(--black); display: flex; align-items: center; padding: 0 32px; height: 70px; position: sticky; top: 0; z-index: 100; gap: 16px; }
+    .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; margin-right: auto; }
+    .nav-logo { width: 44px; height: 44px; background: var(--gold); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--black); }
+    .nav-title span:first-child { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--gold); letter-spacing: 1px; line-height: 1; display: block; }
+    .nav-title span:last-child { font-size: 11px; color: #888; display: block; }
+    .nav-link { color: var(--gold); text-decoration: none; font-size: 14px; font-weight: 600; padding: 8px 16px; border-radius: 8px; transition: background 0.2s; display: flex; align-items: center; gap: 6px; }
     .nav-link:hover { background: rgba(245,197,24,0.1); }
-
-    .nav-link.active {
-      background: var(--gold);
-      color: var(--black);
-    }
-
-    .nav-badge {
-      background: var(--black);
-      color: var(--gold);
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      font-size: 11px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-    }
-
-    .nav-link.active .nav-badge {
-      background: var(--black);
-      color: var(--gold);
-    }
-
-    .btn-outline {
-      border: 2px solid var(--gold);
-      color: var(--gold);
-      background: transparent;
-      padding: 7px 18px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: 'DM Sans', sans-serif;
-    }
-
-    .btn-outline:hover {
-      background: var(--gold);
-      color: var(--black);
-    }
-
-    .btn-gold {
-      background: var(--gold);
-      color: var(--black);
-      border: none;
-      padding: 9px 20px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-      font-family: 'DM Sans', sans-serif;
-    }
-
+    .nav-link.active { background: var(--gold); color: var(--black); }
+    .nav-badge { background: var(--black); color: var(--gold); border-radius: 50%; width: 20px; height: 20px; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .btn-outline { border: 2px solid var(--gold); color: var(--gold); background: transparent; padding: 7px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .btn-outline:hover { background: var(--gold); color: var(--black); }
+    .btn-gold { background: var(--gold); color: var(--black); border: none; padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.2s; font-family: 'DM Sans', sans-serif; }
     .btn-gold:hover { background: var(--gold-dark); }
 
-    /* ── SEARCH SECTION ── */
-    .search-section {
-      background: var(--white);
-      padding: 28px 32px 0;
-      border-bottom: 1px solid var(--gray-light);
-    }
-
-    .search-wrap {
-      max-width: 860px;
-      margin: 0 auto 24px;
-      position: relative;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 18px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #aaa;
-      font-size: 18px;
-    }
-
-    #searchInput {
-      width: 100%;
-      padding: 16px 20px 16px 50px;
-      border: 2px solid var(--gray-light);
-      border-radius: 50px;
-      font-size: 15px;
-      font-family: 'DM Sans', sans-serif;
-      outline: none;
-      transition: border-color 0.2s;
-      color: var(--black);
-    }
-
+    .search-section { background: var(--white); padding: 28px 32px 0; border-bottom: 1px solid var(--gray-light); }
+    .search-wrap { max-width: 860px; margin: 0 auto 24px; position: relative; }
+    .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 18px; }
+    #searchInput { width: 100%; padding: 16px 20px 16px 50px; border: 2px solid var(--gray-light); border-radius: 50px; font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; color: var(--black); }
     #searchInput:focus { border-color: var(--gold); }
     #searchInput::placeholder { color: #aaa; }
 
-    /* ── FILTER PILLS ── */
-    .filter-bar {
-      max-width: 860px;
-      margin: 0 auto;
-      display: flex;
-      gap: 10px;
-      padding-bottom: 0;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-
+    .filter-bar { max-width: 860px; margin: 0 auto; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding-bottom: 1px; }
     .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-pill { padding: 10px 24px; border-radius: 50px; border: 2px solid var(--gray-light); background: var(--white); font-size: 14px; font-weight: 600; color: #555; cursor: pointer; white-space: nowrap; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+    .filter-pill:hover { border-color: var(--gold); color: var(--black); }
+    .filter-pill.active { background: var(--gold); border-color: var(--gold); color: var(--black); }
 
-    .filter-pill {
-      padding: 10px 24px;
-      border-radius: 50px;
-      border: 2px solid var(--gray-light);
-      background: var(--white);
-      font-size: 14px;
-      font-weight: 600;
-      color: #555;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s;
-      font-family: 'DM Sans', sans-serif;
-    }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+    .results-label { font-size: 14px; color: var(--gray-text); margin-bottom: 20px; }
 
-    .filter-pill:hover {
-      border-color: var(--gold);
-      color: var(--black);
-    }
+    .event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+    .event-card { background: var(--white); border-radius: var(--card-radius); overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; animation: fadeUp 0.4s ease both; }
+    .event-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 
-    .filter-pill.active {
-      background: var(--gold);
-      border-color: var(--gold);
-      color: var(--black);
-    }
+    .card-banner { height: 160px; background: linear-gradient(135deg, #F5C518 0%, #E8A800 100%); display: flex; align-items: center; justify-content: center; position: relative; font-size: 56px; }
+    .card-category-tag { position: absolute; top: 12px; left: 12px; background: var(--black); color: var(--white); font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 5px 10px; border-radius: 20px; text-transform: uppercase; }
+    .card-body { padding: 16px 18px 18px; }
+    .card-title { font-size: 16px; font-weight: 700; color: var(--black); margin-bottom: 8px; line-height: 1.3; }
+    .card-description { font-size: 13px; color: var(--gray-text); margin-bottom: 12px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card-meta { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+    .card-meta-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-text); }
+    .card-meta-row .icon { font-size: 13px; color: var(--gold-dark); flex-shrink: 0; }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--gray-light); padding-top: 12px; }
+    .rsvp-count { font-size: 13px; color: var(--gray-text); }
 
-    /* ── MAIN CONTENT ── */
-    .main {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 32px 24px;
-    }
-
-    .results-label {
-      font-size: 14px;
-      color: var(--gray-text);
-      margin-bottom: 20px;
-    }
-
-    /* ── EVENT GRID ── */
-    .event-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 24px;
-    }
-
-    .event-card {
-      background: var(--white);
-      border-radius: var(--card-radius);
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      transition: transform 0.2s, box-shadow 0.2s;
-      cursor: pointer;
-      animation: fadeUp 0.4s ease both;
-    }
-
-    .event-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .card-banner {
-      height: 180px;
-      background: linear-gradient(135deg, #F5C518 0%, #E8A800 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      font-size: 64px;
-    }
-
-    .card-category-tag {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      background: var(--black);
-      color: var(--white);
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      padding: 5px 10px;
-      border-radius: 20px;
-      text-transform: uppercase;
-    }
-
-    .card-body {
-      padding: 18px 20px 20px;
-    }
-
-    .card-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--black);
-      margin-bottom: 12px;
-      line-height: 1.3;
-    }
-
-    .card-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 16px;
-    }
-
-    .card-meta-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--gray-text);
-    }
-
-    .card-meta-row .icon {
-      font-size: 14px;
-      color: var(--gold-dark);
-      flex-shrink: 0;
-    }
-
-    .card-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-top: 1px solid var(--gray-light);
-      padding-top: 14px;
-    }
-
-    .rsvp-count {
-      font-size: 13px;
-      color: var(--gray-text);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .btn-rsvp {
-      background: var(--gold);
-      color: var(--black);
-      border: none;
-      padding: 8px 18px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-      font-family: 'DM Sans', sans-serif;
-    }
-
+    .btn-rsvp { background: var(--gold); color: var(--black); border: none; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.2s; font-family: 'DM Sans', sans-serif; }
     .btn-rsvp:hover { background: var(--gold-dark); }
+    .btn-rsvp.rsvped { background: #e8f5e9; color: #2e7d32; cursor: default; }
 
-    .btn-rsvp.rsvped {
-      background: #e8f5e9;
-      color: #2e7d32;
-    }
-
-    /* Owner action buttons on cards */
-    .owner-actions {
-      display: flex;
-      gap: 6px;
-    }
-
-    .btn-edit, .btn-delete {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      transition: background 0.2s;
-    }
-
-    .btn-edit { background: #e3f0ff; color: #1565c0; }
+    .owner-actions { display: flex; gap: 6px; }
+    .btn-edit { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; background: #e3f0ff; color: #1565c0; transition: background 0.2s; }
     .btn-edit:hover { background: #bbdefb; }
-    .btn-delete { background: #ffeaea; color: #c62828; }
+    .btn-delete { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; background: #ffeaea; color: #c62828; transition: background 0.2s; }
     .btn-delete:hover { background: #ffcdd2; }
 
-    /* ── EMPTY STATE ── */
-    .empty-state {
-      text-align: center;
-      padding: 64px 24px;
-      color: var(--gray-text);
-    }
-
+    .required-star { color: #e53935; margin-left: 2px; }
+    .form-hint { font-size: 11px; color: #aaa; margin-top: 3px; }
+    .empty-state { text-align: center; padding: 64px 24px; color: var(--gray-text); }
     .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
     .empty-state h3 { font-size: 18px; font-weight: 700; color: var(--black); margin-bottom: 8px; }
 
-    /* ── MODAL ── */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
     .modal-overlay.open { display: flex; }
-
-    .modal {
-      background: var(--white);
-      border-radius: 20px;
-      padding: 32px;
-      width: 100%;
-      max-width: 480px;
-      animation: modalIn 0.25s ease;
-    }
-
-    @keyframes modalIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-
-    .modal h2 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 28px;
-      letter-spacing: 1px;
-      margin-bottom: 6px;
-    }
-
-    .modal p { color: var(--gray-text); font-size: 14px; margin-bottom: 24px; }
-
-    .form-group { margin-bottom: 16px; }
-
-    .form-group label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--black);
-    }
-
-    .form-group input, .form-group select, .form-group textarea {
-      width: 100%;
-      padding: 11px 14px;
-      border: 2px solid var(--gray-light);
-      border-radius: 10px;
-      font-size: 14px;
-      font-family: 'DM Sans', sans-serif;
-      outline: none;
-      transition: border-color 0.2s;
-      color: var(--black);
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus { border-color: var(--gold); }
-
+    .modal { background: var(--white); border-radius: 20px; padding: 32px; width: 100%; max-width: 480px; animation: modalIn 0.25s ease; max-height: 90vh; overflow-y: auto; }
+    @keyframes modalIn { from { opacity:0; transform:scale(0.95); } to { opacity:1; transform:scale(1); } }
+    .modal h2 { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; margin-bottom: 6px; }
+    .modal > p { color: var(--gray-text); font-size: 14px; margin-bottom: 20px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--black); }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px 14px; border: 2px solid var(--gray-light); border-radius: 10px; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; color: var(--black); }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--gold); }
+    .form-group input.error, .form-group select.error, .form-group textarea.error { border-color: #e53935; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 8px;
-    }
-
-    .btn-cancel {
-      flex: 1;
-      padding: 11px;
-      border: 2px solid var(--gray-light);
-      background: transparent;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      transition: background 0.2s;
-    }
-
+    .modal-actions { display: flex; gap: 10px; margin-top: 12px; }
+    .btn-cancel { flex: 1; padding: 11px; border: 2px solid var(--gray-light); background: transparent; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
     .btn-cancel:hover { background: var(--gray-bg); }
-
-    .btn-submit {
-      flex: 2;
-      padding: 11px;
-      background: var(--gold);
-      border: none;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      transition: background 0.2s;
-    }
-
+    .btn-submit { flex: 2; padding: 11px; background: var(--gold); border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
     .btn-submit:hover { background: var(--gold-dark); }
+    .modal-close { float: right; background: none; border: none; font-size: 22px; cursor: pointer; color: #aaa; line-height: 1; margin-top: -4px; }
 
-    .modal-close {
-      float: right;
-      background: none;
-      border: none;
-      font-size: 22px;
-      cursor: pointer;
-      color: #aaa;
-      line-height: 1;
-      margin-top: -4px;
-    }
-
-    /* ── TOAST ── */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--black);
-      color: var(--white);
-      padding: 14px 20px;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      display: none;
-      align-items: center;
-      gap: 8px;
-      z-index: 300;
-      animation: slideUp 0.3s ease;
-    }
-
-    .toast.show { display: flex; }
-
-    @keyframes slideUp {
-      from { transform: translateY(20px); opacity: 0; }
-      to   { transform: translateY(0); opacity: 1; }
-    }
-
-    /* loading spinner */
-    .spinner {
-      text-align: center;
-      padding: 48px;
-      font-size: 28px;
-      animation: spin 1s linear infinite;
-      display: inline-block;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
-    }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--black); color: var(--white); padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; display: none; z-index: 300; }
+    .toast.show { display: block; }
   </style>
 </head>
 <body>
 
-<!-- ── NAV ── -->
 <nav>
   <a class="nav-brand" href="index.html">
     <div class="nav-logo">H</div>
-    <div class="nav-title">
-      <span>HAWK CENTRAL</span>
-      <span>Campus Events</span>
-    </div>
+    <div class="nav-title"><span>HAWK CENTRAL</span><span>Campus Events</span></div>
   </a>
-
-  <div class="nav-links">
-    <a href="index.html" class="nav-link active">Events</a>
-    <a href="dashboard.html" class="nav-link" id="myRsvpsLink">
-      My RSVPs <span class="nav-badge" id="rsvpBadge">0</span>
-    </a>
-    <a href="dashboard.html" class="nav-link" id="profileLink">Profile</a>
-  </div>
-
-  <div id="authButtons">
+  <a href="index.html" class="nav-link active">Events</a>
+  <a href="dashboard.html" class="nav-link">My RSVPs <span class="nav-badge" id="rsvpBadge">0</span></a>
+  <a href="dashboard.html" class="nav-link">Profile</a>
+  <div id="authButtons" style="display:flex; gap:8px;">
     <button class="btn-outline" onclick="openModal('loginModal')">Log In</button>
-    &nbsp;
     <button class="btn-gold" onclick="openModal('signupModal')">Sign Up</button>
   </div>
-
   <div id="userMenu" style="display:none; align-items:center; gap:12px;">
     <span style="color:#888; font-size:13px;">Welcome, <strong id="userFirstName" style="color:var(--gold)"></strong></span>
     <button class="btn-outline" onclick="logout()">Logout</button>
   </div>
 </nav>
 
-<!-- ── SEARCH + FILTERS ── -->
 <div class="search-section">
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
     <input type="text" id="searchInput" placeholder="Search events by title, location, or description..." oninput="handleSearch()"/>
   </div>
-  <div class="filter-bar" id="filterBar">
+  <div class="filter-bar">
     <button class="filter-pill active" data-category="all" onclick="setFilter(this)">All Events</button>
-    <button class="filter-pill" data-category="Academic & Study" onclick="setFilter(this)">Academic</button>
-    <button class="filter-pill" data-category="Social & Networking" onclick="setFilter(this)">Social</button>
-    <button class="filter-pill" data-category="Sports & Recreation" onclick="setFilter(this)">Sports</button>
-    <button class="filter-pill" data-category="Clubs & Organizations" onclick="setFilter(this)">Clubs</button>
-    <button class="filter-pill" data-category="Career & Professional" onclick="setFilter(this)">Career</button>
-    <button class="filter-pill" data-category="Arts & Culture" onclick="setFilter(this)">Arts</button>
+    <button class="filter-pill" data-category="Academic" onclick="setFilter(this)">Academic</button>
+    <button class="filter-pill" data-category="Social" onclick="setFilter(this)">Social</button>
+    <button class="filter-pill" data-category="Sports" onclick="setFilter(this)">Sports</button>
+    <button class="filter-pill" data-category="Clubs" onclick="setFilter(this)">Clubs</button>
+    <button class="filter-pill" data-category="Career" onclick="setFilter(this)">Career</button>
+    <button class="filter-pill" data-category="Arts" onclick="setFilter(this)">Arts</button>
   </div>
 </div>
 
-<!-- ── MAIN ── -->
 <main class="main">
   <p class="results-label" id="resultsLabel">Loading events...</p>
   <div class="event-grid" id="eventGrid">
-    <div style="text-align:center; padding:48px; grid-column:1/-1;">
-      <span class="spinner">⏳</span>
-    </div>
+    <div style="text-align:center; padding:48px; grid-column:1/-1; font-size:24px;">⏳ Loading...</div>
   </div>
 </main>
 
-<!-- ── ADD EVENT BUTTON (shown when logged in) ── -->
 <button id="addEventBtn" onclick="openModal('eventModal')"
-  style="display:none; position:fixed; bottom:28px; right:28px;
-         background:var(--gold); border:none; border-radius:50px;
-         padding:14px 24px; font-size:15px; font-weight:700;
-         cursor:pointer; font-family:'DM Sans',sans-serif;
-         box-shadow:0 4px 16px rgba(0,0,0,0.2); z-index:99;
-         transition: transform 0.2s;">
+  style="display:none; position:fixed; bottom:28px; right:28px; background:var(--gold);
+         border:none; border-radius:50px; padding:14px 24px; font-size:15px; font-weight:700;
+         cursor:pointer; font-family:'DM Sans',sans-serif; box-shadow:0 4px 16px rgba(0,0,0,0.2); z-index:99;">
   + Add Event
 </button>
 
-<!-- ── LOGIN MODAL ── -->
+<!-- LOGIN -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
     <h2>Welcome Back</h2>
     <p>Log in to your Hawk Central account</p>
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="loginEmail" placeholder="you@hawk.edu"/>
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="loginPassword" placeholder="••••••••"/>
-    </div>
+    <div class="form-group"><label>Email <span class="required-star">*</span></label><input type="email" id="loginEmail" placeholder="you@hawk.edu"/></div>
+    <div class="form-group"><label>Password <span class="required-star">*</span></label><input type="password" id="loginPassword" placeholder="••••••••"/></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('loginModal')">Cancel</button>
       <button class="btn-submit" onclick="handleLogin()">Log In</button>
     </div>
-    <p style="text-align:center; margin-top:16px; font-size:13px;">
-      Don't have an account? <a href="#" onclick="switchModal('loginModal','signupModal')" style="color:var(--gold-dark); font-weight:600;">Sign up</a>
-    </p>
-    <p style="text-align:center; margin-top:8px; font-size:13px;">
-      <a href="forgot-password.html" style="color:#aaa;">Forgot password?</a>
-    </p>
+    <p style="text-align:center; margin-top:14px; font-size:13px;">Don't have an account? <a href="#" onclick="switchModal('loginModal','signupModal')" style="color:var(--gold-dark);font-weight:600;">Sign up</a></p>
+    <p style="text-align:center; margin-top:8px; font-size:13px;"><a href="forgot-password.html" style="color:#aaa;">Forgot password?</a></p>
   </div>
 </div>
 
-<!-- ── SIGNUP MODAL ── -->
+<!-- SIGNUP -->
 <div class="modal-overlay" id="signupModal">
-  <div class="modal">
+  <div class="modal" style="max-width:520px;">
     <button class="modal-close" onclick="closeModal('signupModal')">✕</button>
     <h2>Join Hawk Central</h2>
-    <p>Create your account to RSVP and post events</p>
+    <p>Fields marked <span class="required-star">*</span> are required</p>
     <div class="form-row">
-      <div class="form-group">
-        <label>First Name</label>
-        <input type="text" id="signupFirst" placeholder="First"/>
-      </div>
-      <div class="form-group">
-        <label>Last Name</label>
-        <input type="text" id="signupLast" placeholder="Last"/>
-      </div>
+      <div class="form-group"><label>First Name <span class="required-star">*</span></label><input type="text" id="signupFirst" placeholder="First"/></div>
+      <div class="form-group"><label>Last Name <span class="required-star">*</span></label><input type="text" id="signupLast" placeholder="Last"/></div>
     </div>
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="signupEmail" placeholder="you@hawk.edu"/>
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="signupPassword" placeholder="••••••••"/>
-    </div>
+    <div class="form-group"><label>Email <span class="required-star">*</span></label><input type="email" id="signupEmail" placeholder="you@hawk.edu"/></div>
+    <div class="form-group"><label>Password <span class="required-star">*</span></label><input type="password" id="signupPassword" placeholder="••••••••"/></div>
     <div class="form-row">
-      <div class="form-group">
-        <label>Student ID</label>
-        <input type="text" id="signupStudentId" placeholder="S12345678"/>
-      </div>
-      <div class="form-group">
-        <label>Grad Year</label>
-        <input type="number" id="signupGradYear" placeholder="2027"/>
-      </div>
+      <div class="form-group"><label>Student ID</label><input type="text" id="signupStudentId" placeholder="S12345678"/></div>
+      <div class="form-group"><label>Grad Year</label><input type="number" id="signupGradYear" placeholder="2027"/></div>
     </div>
-    <div class="form-group">
-      <label>Major</label>
-      <input type="text" id="signupMajor" placeholder="e.g. Computer Science"/>
-    </div>
+    <div class="form-group"><label>Major</label><input type="text" id="signupMajor" placeholder="e.g. Computer Science"/></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('signupModal')">Cancel</button>
       <button class="btn-submit" onclick="handleSignup()">Create Account</button>
     </div>
-    <p style="text-align:center; margin-top:16px; font-size:13px;">
-      Already have an account? <a href="#" onclick="switchModal('signupModal','loginModal')" style="color:var(--gold-dark); font-weight:600;">Log in</a>
-    </p>
+    <p style="text-align:center; margin-top:14px; font-size:13px;">Already have an account? <a href="#" onclick="switchModal('signupModal','loginModal')" style="color:var(--gold-dark);font-weight:600;">Log in</a></p>
   </div>
 </div>
 
-<!-- ── CREATE / EDIT EVENT MODAL ── -->
+<!-- CREATE / EDIT EVENT -->
 <div class="modal-overlay" id="eventModal">
   <div class="modal" style="max-width:540px;">
     <button class="modal-close" onclick="closeModal('eventModal')">✕</button>
     <h2 id="eventModalTitle">Add New Event</h2>
-    <p id="eventModalSubtitle">Fill in the details below to post your event</p>
-    <input type="hidden" id="editEventId"/>
-    <div class="form-group">
-      <label>Event Title</label>
-      <input type="text" id="evTitle" placeholder="e.g. Spring Career Fair 2026"/>
-    </div>
-    <div class="form-group">
-      <label>Description</label>
-      <textarea id="evDescription" rows="3" placeholder="What's this event about?"></textarea>
+    <p id="eventModalSubtitle">Fields marked <span class="required-star">*</span> are required</p>
+    <div class="form-group"><label>Event Title <span class="required-star">*</span></label><input type="text" id="evTitle" placeholder="e.g. Spring Career Fair 2026"/></div>
+    <div class="form-group"><label>Description <span class="required-star">*</span></label><textarea id="evDescription" rows="3" placeholder="What's this event about?"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>Date <span class="required-star">*</span></label><input type="date" id="evDate"/></div>
+      <div class="form-group"><label>Start Time <span class="required-star">*</span></label><input type="time" id="evStartTime"/></div>
     </div>
     <div class="form-row">
-      <div class="form-group">
-        <label>Date</label>
-        <input type="date" id="evDate"/>
-      </div>
-      <div class="form-group">
-        <label>Start Time</label>
-        <input type="time" id="evStartTime"/>
-      </div>
+      <div class="form-group"><label>Category <span class="required-star">*</span></label><select id="evCategory"><option value="">Select category...</option></select></div>
+      <div class="form-group"><label>Location <span class="required-star">*</span></label><select id="evLocation"><option value="">Select location...</option></select></div>
     </div>
     <div class="form-row">
-      <div class="form-group">
-        <label>Category</label>
-        <select id="evCategory">
-          <option value="">Select category...</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Location</label>
-        <select id="evLocation">
-          <option value="">Select location...</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Organizer Name</label>
-        <input type="text" id="evOrganizer" placeholder="Club or dept name"/>
-      </div>
+      <div class="form-group"><label>Organizer Name <span class="required-star">*</span></label><input type="text" id="evOrganizer" placeholder="Club or department"/></div>
       <div class="form-group">
         <label>Max Capacity</label>
-        <input type="number" id="evCapacity" placeholder="e.g. 100"/>
+        <input type="number" id="evCapacity" placeholder="Leave blank = unlimited"/>
+        <div class="form-hint">Optional — leave blank for unlimited</div>
       </div>
     </div>
     <div class="modal-actions">
@@ -752,7 +222,6 @@
   </div>
 </div>
 
-<!-- ── TOAST ── -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -762,16 +231,16 @@
   let activeCategory = 'all';
   let searchTerm = '';
   let editingEventId = null;
+  let myRsvpedEvents = JSON.parse(localStorage.getItem('hc_rsvps') || '[]');
 
-  // ── INIT ──
   window.addEventListener('DOMContentLoaded', () => {
     updateAuthUI();
     loadEvents();
     loadCategories();
     loadLocations();
+    updateRsvpBadge();
   });
 
-  // ── AUTH UI ──
   function updateAuthUI() {
     if (currentUser) {
       document.getElementById('authButtons').style.display = 'none';
@@ -785,101 +254,79 @@
     }
   }
 
-  // ── LOAD EVENTS ──
+  function updateRsvpBadge() {
+    document.getElementById('rsvpBadge').textContent = myRsvpedEvents.length;
+  }
+
   async function loadEvents() {
     try {
       const res = await fetch(`${API}/events`);
       allEvents = await res.json();
-      // Sort by event_date ascending (soonest first)
       allEvents.sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
       renderEvents();
-    } catch (err) {
-      document.getElementById('eventGrid').innerHTML = `
-        <div class="empty-state" style="grid-column:1/-1">
-          <div class="icon">⚠️</div>
-          <h3>Could not load events</h3>
-          <p>Make sure the server is running on localhost:3000</p>
-        </div>`;
+    } catch {
+      document.getElementById('eventGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">⚠️</div><h3>Could not load events</h3><p>Make sure the server is running on localhost:3000</p></div>`;
     }
   }
 
-  // ── RENDER EVENTS ──
   function renderEvents() {
     const grid = document.getElementById('eventGrid');
     const label = document.getElementById('resultsLabel');
-
-    let filtered = allEvents;
+    let filtered = [...allEvents];
 
     if (activeCategory !== 'all') {
-      filtered = filtered.filter(e =>
-        e.category_name && e.category_name.toLowerCase().includes(activeCategory.toLowerCase())
-      );
+      filtered = filtered.filter(e => e.category_name && e.category_name.toLowerCase().includes(activeCategory.toLowerCase()));
     }
-
     if (searchTerm) {
       const s = searchTerm.toLowerCase();
       filtered = filtered.filter(e =>
         (e.title && e.title.toLowerCase().includes(s)) ||
         (e.description && e.description.toLowerCase().includes(s)) ||
-        (e.location_name && e.location_name.toLowerCase().includes(s)) ||
-        (e.building_name && e.building_name.toLowerCase().includes(s))
+        (e.location_name && e.location_name.toLowerCase().includes(s))
       );
     }
 
     label.textContent = `Showing ${filtered.length} upcoming event${filtered.length !== 1 ? 's' : ''}`;
 
     if (filtered.length === 0) {
-      grid.innerHTML = `
-        <div class="empty-state" style="grid-column:1/-1">
-          <div class="icon">📭</div>
-          <h3>No events found</h3>
-          <p>Try a different search or filter</p>
-        </div>`;
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">📭</div><h3>No events found</h3><p>Try a different search or filter</p></div>`;
       return;
     }
 
     grid.innerHTML = filtered.map((e, i) => {
-      const emoji = getCategoryEmoji(e.category_name);
-      const dateStr = formatDate(e.event_date, e.start_time);
-      const location = e.location_name || e.building_name || 'TBD';
       const isOwner = currentUser && currentUser.user_id === e.created_by;
       const isAdmin = currentUser && currentUser.role === 'super_admin';
-
+      const alreadyRsvped = myRsvpedEvents.includes(e.event_id);
       return `
-        <div class="event-card" style="animation-delay:${i * 0.05}s">
+        <div class="event-card" style="animation-delay:${i*0.05}s">
           <div class="card-banner">
             <span class="card-category-tag">${e.category_name || 'Event'}</span>
-            ${emoji}
+            ${getCategoryEmoji(e.category_name)}
           </div>
           <div class="card-body">
             <div class="card-title">${e.title}</div>
+            ${e.description ? `<div class="card-description">${e.description}</div>` : ''}
             <div class="card-meta">
-              <div class="card-meta-row">
-                <span class="icon">📅</span>
-                <span>${dateStr}</span>
-              </div>
-              <div class="card-meta-row">
-                <span class="icon">📍</span>
-                <span>${location}</span>
-              </div>
+              <div class="card-meta-row"><span class="icon">📅</span><span>${formatDate(e.event_date, e.start_time)}</span></div>
+              <div class="card-meta-row"><span class="icon">📍</span><span>${e.location_name || e.building_name || 'TBD'}</span></div>
+              ${e.max_capacity ? `<div class="card-meta-row"><span class="icon">👥</span><span>Capacity: ${e.max_capacity}</span></div>` : ''}
             </div>
             <div class="card-footer">
-              <span class="rsvp-count">👥 ${e.rsvp_count || 0} going</span>
+              <span class="rsvp-count">✅ ${e.rsvp_count || 0} going</span>
               ${(isOwner || isAdmin) ? `
                 <div class="owner-actions">
-                  <button class="btn-edit" onclick="openEditEvent(${e.event_id})" title="Edit">✏️</button>
-                  <button class="btn-delete" onclick="deleteEvent(${e.event_id})" title="Delete">🗑️</button>
-                </div>
-              ` : `
-                <button class="btn-rsvp" onclick="handleRSVP(${e.event_id}, this)">RSVP</button>
-              `}
+                  <button class="btn-edit" onclick="openEditEvent(${e.event_id})">✏️</button>
+                  <button class="btn-delete" onclick="deleteEvent(${e.event_id})">🗑️</button>
+                </div>` : `
+                <button class="btn-rsvp ${alreadyRsvped ? 'rsvped' : ''}" id="rsvpBtn_${e.event_id}" onclick="handleRSVP(${e.event_id}, this)">
+                  ${alreadyRsvped ? '✓ Going' : 'RSVP'}
+                </button>`}
             </div>
           </div>
         </div>`;
     }).join('');
   }
 
-  // ── FILTERS ──
   function setFilter(btn) {
     document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
@@ -892,38 +339,42 @@
     renderEvents();
   }
 
-  // ── RSVP ──
   async function handleRSVP(eventId, btn) {
     if (!currentUser) {
+      showToast('⚠️ Please log in to RSVP');
       openModal('loginModal');
       return;
     }
+    if (myRsvpedEvents.includes(eventId)) {
+      showToast('You already RSVP\'d to this event!');
+      return;
+    }
     try {
-      await fetch(`${API}/rsvp`, {
+      const res = await fetch(`${API}/rsvp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ event_id: eventId, user_id: currentUser.user_id, rsvp_status: 'attending' })
       });
+      if (!res.ok) throw new Error(await res.text());
+      myRsvpedEvents.push(eventId);
+      localStorage.setItem('hc_rsvps', JSON.stringify(myRsvpedEvents));
+      updateRsvpBadge();
       btn.textContent = '✓ Going';
       btn.classList.add('rsvped');
+      const ev = allEvents.find(e => e.event_id === eventId);
+      if (ev) ev.rsvp_count = (parseInt(ev.rsvp_count) || 0) + 1;
       showToast('✅ RSVP confirmed!');
     } catch (err) {
-      showToast('❌ Could not save RSVP');
+      showToast('❌ RSVP failed: ' + err.message);
     }
   }
 
-  // ── CREATE / EDIT EVENT ──
   async function loadCategories() {
     try {
       const res = await fetch(`${API}/categories`);
       const cats = await res.json();
       const sel = document.getElementById('evCategory');
-      cats.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.category_id;
-        opt.textContent = c.category_name;
-        sel.appendChild(opt);
-      });
+      cats.forEach(c => { const o = document.createElement('option'); o.value = c.category_id; o.textContent = c.category_name; sel.appendChild(o); });
     } catch {}
   }
 
@@ -932,95 +383,84 @@
       const res = await fetch(`${API}/locations`);
       const locs = await res.json();
       const sel = document.getElementById('evLocation');
-      locs.forEach(l => {
-        const opt = document.createElement('option');
-        opt.value = l.location_id;
-        opt.textContent = l.location_name;
-        sel.appendChild(opt);
-      });
+      locs.forEach(l => { const o = document.createElement('option'); o.value = l.location_id; o.textContent = l.location_name; sel.appendChild(o); });
     } catch {}
+  }
+
+  function validateEventForm() {
+    let valid = true;
+    document.querySelectorAll('#eventModal input, #eventModal select, #eventModal textarea').forEach(el => el.classList.remove('error'));
+    [['evTitle','Title'],['evDescription','Description'],['evDate','Date'],['evStartTime','Start Time'],['evOrganizer','Organizer']].forEach(([id]) => {
+      const el = document.getElementById(id);
+      if (!el.value.trim()) { el.classList.add('error'); valid = false; }
+    });
+    if (!document.getElementById('evCategory').value) { document.getElementById('evCategory').classList.add('error'); valid = false; }
+    if (!document.getElementById('evLocation').value) { document.getElementById('evLocation').classList.add('error'); valid = false; }
+    if (!valid) showToast('⚠️ Please fill in all required fields (marked with *)');
+    return valid;
   }
 
   async function handleSaveEvent() {
     if (!currentUser) return;
-
+    if (!validateEventForm()) return;
+    const cap = document.getElementById('evCapacity').value;
     const payload = {
-      title: document.getElementById('evTitle').value,
-      description: document.getElementById('evDescription').value,
+      title: document.getElementById('evTitle').value.trim(),
+      description: document.getElementById('evDescription').value.trim(),
       event_date: document.getElementById('evDate').value,
       start_time: document.getElementById('evStartTime').value,
-      category_id: document.getElementById('evCategory').value,
-      location_id: document.getElementById('evLocation').value,
-      organizer_name: document.getElementById('evOrganizer').value,
-      max_capacity: document.getElementById('evCapacity').value,
+      category_id: parseInt(document.getElementById('evCategory').value),
+      location_id: parseInt(document.getElementById('evLocation').value),
+      organizer_name: document.getElementById('evOrganizer').value.trim(),
+      max_capacity: cap ? parseInt(cap) : null,
       created_by: currentUser.user_id
     };
-
     try {
+      let res;
       if (editingEventId) {
-        await fetch(`${API}/events/${editingEventId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...payload, user_id: currentUser.user_id, user_role: currentUser.role })
-        });
+        res = await fetch(`${API}/events/${editingEventId}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({...payload, user_id: currentUser.user_id, user_role: currentUser.role}) });
         showToast('✅ Event updated!');
       } else {
-        await fetch(`${API}/events`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+        res = await fetch(`${API}/events`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
         showToast('✅ Event created!');
       }
+      if (!res.ok) { showToast('❌ ' + await res.text()); return; }
       closeModal('eventModal');
-      loadEvents();
-    } catch (err) {
-      showToast('❌ Could not save event');
-    }
+      await loadEvents();
+    } catch { showToast('❌ Could not save event'); }
   }
 
   function openEditEvent(eventId) {
-    const event = allEvents.find(e => e.event_id === eventId);
-    if (!event) return;
+    const e = allEvents.find(ev => ev.event_id === eventId);
+    if (!e) return;
     editingEventId = eventId;
     document.getElementById('eventModalTitle').textContent = 'Edit Event';
-    document.getElementById('eventModalSubtitle').textContent = 'Update the event details below';
-    document.getElementById('evTitle').value = event.title || '';
-    document.getElementById('evDescription').value = event.description || '';
-    document.getElementById('evDate').value = event.event_date ? event.event_date.slice(0,10) : '';
-    document.getElementById('evStartTime').value = event.start_time || '';
-    document.getElementById('evCategory').value = event.category_id || '';
-    document.getElementById('evLocation').value = event.location_id || '';
-    document.getElementById('evOrganizer').value = event.organizer_name || '';
-    document.getElementById('evCapacity').value = event.max_capacity || '';
+    document.getElementById('evTitle').value = e.title || '';
+    document.getElementById('evDescription').value = e.description || '';
+    document.getElementById('evDate').value = e.event_date ? e.event_date.slice(0,10) : '';
+    document.getElementById('evStartTime').value = e.start_time || '';
+    document.getElementById('evCategory').value = e.category_id || '';
+    document.getElementById('evLocation').value = e.location_id || '';
+    document.getElementById('evOrganizer').value = e.organizer_name || '';
+    document.getElementById('evCapacity').value = e.max_capacity || '';
     openModal('eventModal');
   }
 
   async function deleteEvent(eventId) {
-    if (!confirm('Are you sure you want to delete this event?')) return;
+    if (!confirm('Delete this event? This cannot be undone.')) return;
     try {
-      await fetch(`${API}/events/${eventId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: currentUser.user_id, user_role: currentUser.role })
-      });
+      await fetch(`${API}/events/${eventId}`, { method: 'DELETE', headers: {'Content-Type':'application/json'}, body: JSON.stringify({user_id: currentUser.user_id, user_role: currentUser.role}) });
       showToast('🗑️ Event deleted');
-      loadEvents();
-    } catch {
-      showToast('❌ Could not delete event');
-    }
+      await loadEvents();
+    } catch { showToast('❌ Could not delete event'); }
   }
 
-  // ── LOGIN / SIGNUP ──
   async function handleLogin() {
-    const email = document.getElementById('loginEmail').value;
+    const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
+    if (!email || !password) { showToast('⚠️ Please enter email and password'); return; }
     try {
-      const res = await fetch(`${API}/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+      const res = await fetch(`${API}/login`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email, password}) });
       if (!res.ok) { showToast('❌ ' + await res.text()); return; }
       currentUser = await res.json();
       localStorage.setItem('hc_user', JSON.stringify(currentUser));
@@ -1028,25 +468,17 @@
       updateAuthUI();
       renderEvents();
       showToast(`👋 Welcome back, ${currentUser.first_name}!`);
-    } catch { showToast('❌ Login failed'); }
+    } catch { showToast('❌ Login failed — is the server running?'); }
   }
 
   async function handleSignup() {
-    const payload = {
-      email: document.getElementById('signupEmail').value,
-      password: document.getElementById('signupPassword').value,
-      first_name: document.getElementById('signupFirst').value,
-      last_name: document.getElementById('signupLast').value,
-      student_id: document.getElementById('signupStudentId').value,
-      graduation_year: document.getElementById('signupGradYear').value,
-      major: document.getElementById('signupMajor').value,
-    };
+    const first = document.getElementById('signupFirst').value.trim();
+    const last = document.getElementById('signupLast').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    if (!first || !last || !email || !password) { showToast('⚠️ Please fill in all required fields'); return; }
     try {
-      const res = await fetch(`${API}/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const res = await fetch(`${API}/signup`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email, password, first_name: first, last_name: last, student_id: document.getElementById('signupStudentId').value, graduation_year: document.getElementById('signupGradYear').value || null, major: document.getElementById('signupMajor').value}) });
       if (!res.ok) { showToast('❌ ' + await res.text()); return; }
       currentUser = await res.json();
       localStorage.setItem('hc_user', JSON.stringify(currentUser));
@@ -1059,25 +491,29 @@
   function logout() {
     currentUser = null;
     localStorage.removeItem('hc_user');
+    localStorage.removeItem('hc_rsvps');
+    myRsvpedEvents = [];
     updateAuthUI();
+    updateRsvpBadge();
     renderEvents();
     showToast('👋 Logged out');
   }
 
-  // ── HELPERS ──
   function openModal(id) {
-    if (id === 'eventModal') {
-      editingEventId = null;
+    if (id === 'eventModal' && !editingEventId) {
       document.getElementById('eventModalTitle').textContent = 'Add New Event';
-      document.getElementById('eventModalSubtitle').textContent = 'Fill in the details below to post your event';
-      ['evTitle','evDescription','evDate','evStartTime','evOrganizer','evCapacity'].forEach(f => {
-        document.getElementById(f).value = '';
-      });
+      ['evTitle','evDescription','evDate','evStartTime','evOrganizer','evCapacity'].forEach(f => document.getElementById(f).value = '');
+      document.getElementById('evCategory').value = '';
+      document.getElementById('evLocation').value = '';
     }
     document.getElementById(id).classList.add('open');
   }
 
-  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  function closeModal(id) {
+    editingEventId = null;
+    document.getElementById(id).classList.remove('open');
+    document.querySelectorAll('#eventModal input, #eventModal select, #eventModal textarea').forEach(el => el.classList.remove('error'));
+  }
 
   function switchModal(from, to) { closeModal(from); openModal(to); }
 
@@ -1085,7 +521,7 @@
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
+    setTimeout(() => t.classList.remove('show'), 3500);
   }
 
   function formatDate(dateStr, timeStr) {
@@ -1095,9 +531,7 @@
     if (!timeStr) return date;
     const [h, m] = timeStr.split(':');
     const hour = parseInt(h);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const hour12 = hour % 12 || 12;
-    return `${date} • ${hour12}:${m} ${ampm}`;
+    return `${date} • ${hour % 12 || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
   }
 
   function getCategoryEmoji(cat) {
@@ -1112,12 +546,7 @@
     return '📅';
   }
 
-  // Close modal on overlay click
-  document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', e => {
-      if (e.target === overlay) overlay.classList.remove('open');
-    });
-  });
+  document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); }));
 </script>
 </body>
 </html>
