@@ -355,7 +355,7 @@
 
   async function cancelRSVP(eventId) {
     try {
-      var res=await fetch(API+'/rsvp',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({event_id:eventId,user_id:currentUser.user_id})});
+      var res=await fetch(API+'/rsvp?event_id='+eventId+'&user_id='+currentUser.user_id,{method:'DELETE'});
       if (!res.ok) throw new Error(await res.text());
       var stored=JSON.parse(localStorage.getItem('hc_rsvps')||'[]').filter(id=>id!==eventId);
       localStorage.setItem('hc_rsvps',JSON.stringify(stored));
@@ -365,7 +365,8 @@
 
   async function deleteEvent(eventId) {
     try {
-      await fetch(API+'/events/'+eventId,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:currentUser.user_id,user_role:currentUser.role})});
+      var res=await fetch(API+'/events/'+eventId+'?user_id='+currentUser.user_id+'&user_role='+currentUser.role,{method:'DELETE'});
+      if (!res.ok) throw new Error(await res.text());
       showToast('🗑️ Event deleted'); await buildDashboard();
     } catch(e) { showToast('❌ Could not delete event'); }
   }
