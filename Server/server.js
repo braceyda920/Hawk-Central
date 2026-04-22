@@ -48,7 +48,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
-app.use(express.static(path.join(__dirname, '../Client')));
+app.use(express.static(path.join(__dirname, 'Client')));
 
 // ==================== EMAIL SETUP ====================
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -95,7 +95,7 @@ app.get('/featured', async (req, res) => {
 // ==================== ROOT + FRONTEND FALLBACK ====================
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../Client', 'index.html'));
+  res.sendFile(path.join(__dirname, 'Client', 'index.html'));
 });
 
 // ==================== ROOT ====================
