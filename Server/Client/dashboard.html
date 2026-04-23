@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -7,8 +7,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --gold: #F5C518; --gold-dark: #D4A900; --black: #111111; --white: #FFFFFF; --gray-bg: #F3F3F3; --gray-light: #E8E8E8; --gray-text: #666666; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--gray-bg); color: var(--black); min-height: 100vh; }
+    :root { --gold: #F5C518; --gold-dark: #D4A900; }
+    [data-theme="dark"] {
+      --black: #111111; --white: #1e1e1e; --gray-bg: #141414; --gray-light: #2a2a2a; --gray-text: #aaaaaa; --border: #333333; --card-shadow: rgba(0,0,0,0.3);
+    }
+    [data-theme="light"] {
+      --black: #111111; --white: #FFFFFF; --gray-bg: #F3F3F3; --gray-light: #E8E8E8; --gray-text: #666666; --border: #e0e0e0; --card-shadow: rgba(0,0,0,0.05);
+    }
+    .theme-toggle { background: none; border: 2px solid #444; border-radius: 8px; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: border-color 0.2s; flex-shrink: 0; }
+    .theme-toggle:hover { border-color: var(--gold); }
+    body { font-family: 'DM Sans', sans-serif; background: var(--gray-bg); color: var(--black); min-height: 100vh; transition: background 0.2s, color 0.2s; }
     nav { background: var(--black); display: flex; align-items: center; padding: 0 32px; height: 70px; position: sticky; top: 0; z-index: 100; gap: 16px; }
     .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; margin-right: auto; }
     .nav-logo { width: 44px; height: 44px; background: var(--gold); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--black); }
@@ -87,7 +95,7 @@
     .autocomplete-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: var(--white); border: 2px solid var(--gold); border-top: none; border-radius: 0 0 10px 10px; max-height: 180px; overflow-y: auto; z-index: 50; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     .autocomplete-dropdown.open { display: block; }
     .autocomplete-item { padding: 10px 14px; font-size: 14px; cursor: pointer; transition: background 0.15s; }
-    .autocomplete-item:hover { background: #fff8d6; }
+    .autocomplete-item:hover { background: var(--gray-light); }
     .autocomplete-item.create-new { color: var(--gold-dark); font-weight: 600; border-top: 1px solid var(--gray-light); }
 
     /* MODALS */
@@ -138,6 +146,7 @@
   <a href="index.html" class="nav-link">Events</a>
   <a href="dashboard.html" class="nav-link active">My Dashboard</a>
   <span id="navUser" style="color:#888; font-size:13px;"></span>
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">🌙</button>
   <button class="btn-outline" onclick="logout()">Logout</button>
 </nav>
 
@@ -210,6 +219,7 @@
   const API = 'https://hawk-central-production.up.railway.app';
   let currentUser = JSON.parse(localStorage.getItem('hc_user') || 'null');
   let myEvents=[], myRsvps=[], mySaved=[], activeTab='my-events', editingEventId=null, searchTerm='';
+  var pendingActions={};
   let allCategories=[], allLocations=[];
   const today=new Date(); today.setHours(0,0,0,0);
 
@@ -217,7 +227,7 @@
     var p=e.event_date.slice(0,10).split('-');
     var d=new Date(+p[0],+p[1]-1,+p[2]);
     var diff=Math.ceil((d-today)/(1000*60*60*24));
-    if (e.is_archived) return 'archived';
+    if (e.is_archived || e.is_active === false || e.is_active === 'false') return 'archived';
     if (diff<0) return 'past';
     if (diff<=3) return 'soon';
     return 'upcoming';
@@ -246,7 +256,7 @@
   async function loadLocations() { try { allLocations=await (await fetch(API+'/locations')).json(); } catch(e){} }
 
   async function buildDashboard() {
-    try { var all=await (await fetch(API+'/events')).json(); myEvents=all.filter(e=>e.created_by===currentUser.user_id).sort((a,b)=>new Date(a.event_date)-new Date(b.event_date)); } catch(e){myEvents=[];}
+    try { myEvents=await (await fetch(API+'/events/mine/'+currentUser.user_id)).json(); myEvents.sort((a,b)=>new Date(a.event_date)-new Date(b.event_date)); } catch(e){myEvents=[];}
     try { myRsvps=await (await fetch(API+'/rsvp/user/'+currentUser.user_id)).json(); } catch(e){myRsvps=[];}
     try { mySaved=await (await fetch(API+'/saved/user/'+currentUser.user_id)).json(); } catch(e){ mySaved=[]; }
     renderPage();
@@ -309,7 +319,7 @@
         '<td><div class="td-actions">'+
           (status!=='archived'?'<button class="btn-edit" onclick="openEditEvent('+e.event_id+')" title="Edit">✏️</button>':'')+
           (isPast&&status!=='archived'?'<button class="btn-archive" onclick="confirmArchive('+e.event_id+',\''+e.title.replace(/'/g,"\\'")+'\')">📦</button>':'')+
-          '<button class="btn-delete" onclick="showConfirm(\'🗑️\',\'Delete Event?\',\'\\\"'+e.title.replace(/'/g,"\\'")+'\\\" will be permanently deleted.\',function(){deleteEvent('+e.event_id+')})" title="Delete">🗑️</button>'+
+          '<button class="btn-delete" onclick="pendingActions['+e.event_id+']=function(){deleteEvent('+e.event_id+')};showConfirm(\'🗑️\',\'Delete Event?\',\'This event will be permanently deleted.\',pendingActions['+e.event_id+'])" title="Delete">🗑️</button>'+
         '</div></td></tr>';
     });
     container.innerHTML='<div class="table-wrap"><table><thead><tr><th>Event Name</th><th>Date</th><th>Category</th><th>Location</th><th>RSVPs</th><th>Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
@@ -323,7 +333,7 @@
     rsvps.forEach((e,i)=>{
       cards+='<div class="rsvp-card" style="animation-delay:'+(i*0.05)+'s">'+
         '<div class="rsvp-card-header"><div class="rsvp-card-title">'+e.title+'</div>'+
-        '<button class="btn-cancel-rsvp" onclick="showConfirm(\'🎫\',\'Cancel RSVP?\',\'Cancel your RSVP for \\\"'+e.title.replace(/'/g,"\\'")+'\\\"\?\',function(){cancelRSVP('+e.event_id+')})">✕ Cancel</button></div>'+
+        '<button class="btn-cancel-rsvp" onclick="pendingActions['+e.event_id+']=function(){cancelRSVP('+e.event_id+')};showConfirm(\'🎫\',\'Cancel RSVP?\',\'Cancel your RSVP for this event?\',pendingActions['+e.event_id+'])">✕ Cancel</button></div>'+
         '<div class="rsvp-card-meta"><span>📅 '+formatDate(e.event_date)+'</span><span>📍 '+(e.location_name||'—')+'</span><span>🏷️ '+(e.category_name||'—')+'</span></div>'+
       '</div>';
     });
@@ -366,9 +376,9 @@
   async function deleteEvent(eventId) {
     try {
       var res=await fetch(API+'/events/'+eventId+'?user_id='+currentUser.user_id+'&user_role='+currentUser.role,{method:'DELETE'});
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) { var err=await res.text(); showToast('❌ Delete failed: '+err); return; }
       showToast('🗑️ Event deleted'); await buildDashboard();
-    } catch(e) { showToast('❌ Could not delete event'); }
+    } catch(e) { showToast('❌ Could not delete event: '+e.message); }
   }
 
   function confirmArchive(eventId, title) {
@@ -466,6 +476,23 @@
   function closeModal() { editingEventId=null; document.getElementById('eventModal').classList.remove('open'); }
 
   function logout() { localStorage.removeItem('hc_user'); localStorage.removeItem('hc_rsvps'); window.location.href='index.html'; }
+
+  function toggleTheme() {
+    var html = document.documentElement;
+    var isDark = html.getAttribute('data-theme') === 'dark';
+    var newTheme = isDark ? 'light' : 'dark';
+    html.setAttribute('data-theme', newTheme);
+    document.getElementById('themeToggle').textContent = isDark ? '🌙' : '☀️';
+    localStorage.setItem('hc_theme', newTheme);
+  }
+  (function initTheme() {
+    var saved = localStorage.getItem('hc_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    document.addEventListener('DOMContentLoaded', function() {
+      var btn = document.getElementById('themeToggle');
+      if (btn) btn.textContent = saved === 'dark' ? '🌙' : '☀️';
+    });
+  })();
 
   function showToast(msg) {
     var t=document.getElementById('toast'); t.textContent=msg; t.className='toast show';
