@@ -52,6 +52,14 @@ pool.connect()
   .then(() => console.log('✅ PostgreSQL connected'))
   .catch(err => console.error('❌ PostgreSQL connection error', err));
 
+// Ensure reset token columns exist on startup
+pool.query(`
+  ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS reset_token VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS reset_token_expiry TIMESTAMP
+`).then(() => console.log('✅ Reset token columns verified'))
+  .catch(err => console.error('⚠️ Could not verify reset token columns:', err));
+
 async function canModifyEvent(userId, userRole, eventId) {
   if (userRole === 'super_admin') return true;
   const result = await pool.query('SELECT created_by FROM events WHERE event_id=$1', [eventId]);
@@ -162,10 +170,13 @@ app.put('/events/:id', async (req, res) => {
             max_capacity, category_id, location_id, is_archived } = req.body;
     const allowed = await canModifyEvent(user_id, user_role, req.params.id);
     if (!allowed) return res.status(403).json({ error: 'You do not have permission to edit this event' });
+
+    // Archive/unarchive only
     if (is_archived !== undefined && !title) {
       const result = await pool.query('UPDATE events SET is_active=$1 WHERE event_id=$2 RETURNING *', [!is_archived, req.params.id]);
       return res.json(result.rows[0]);
     }
+
     let cat_id = category_id;
     if (!cat_id && category_name) {
       let catResult = await pool.query('SELECT category_id FROM categories WHERE LOWER(category_name) = LOWER($1)', [category_name]);
@@ -421,44 +432,76 @@ app.post('/signup', async (req, res) => {
 app.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
+    console.log("📩 Forgot password request for:", email);
+
+    if (!email || !email.includes("@")) {
+      return res.status(400).json({ error: 'Invalid email' });
+    }
+
     const userResult = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
-    if (userResult.rows.length === 0) return res.json({ message: 'If that email exists, a reset link has been sent.' });
+
+    // Always return the same message to prevent email enumeration
+    if (userResult.rows.length === 0) {
+      return res.json({ message: 'If that email exists, a reset link has been sent.' });
+    }
+
     const token = crypto.randomBytes(32).toString('hex');
     const expiry = new Date(Date.now() + 3600000);
-    await pool.query('UPDATE users SET reset_token=$1, reset_token_expiry=$2 WHERE email=$3', [token, expiry, email]);
+
+    await pool.query(
+      'UPDATE users SET reset_token=$1, reset_token_expiry=$2 WHERE email=$3',
+      [token, expiry, email]
+    );
+
     const frontendURL = process.env.FRONTEND_URL || 'https://hawk-central-production.up.railway.app';
     const resetLink = `${frontendURL}/forgot-password.html?token=${token}`;
-    await resend.emails.send({
-      from: 'Hawk Central <noreply@hawkcentral.it.com>',
+    console.log("🔗 Reset link:", resetLink);
+
+    // Fire-and-forget — don't block the response waiting for email
+    resend.emails.send({
+      from: 'noreply@hawkcentral.it.com',
       to: email,
       subject: 'Hawk Central — Reset Your Password',
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
-        <div style="background:#111111;padding:24px;border-radius:12px 12px 0 0;text-align:center;">
-          <h1 style="color:#F5C518;margin:0;font-size:28px;letter-spacing:2px;">HAWK CENTRAL</h1>
-          <p style="color:#888;margin:4px 0 0;font-size:13px;">Campus Events</p>
-        </div>
-        <div style="background:#ffffff;padding:32px;border-radius:0 0 12px 12px;border:1px solid #eee;">
-          <h2 style="margin-bottom:8px;">Reset Your Password</h2>
-          <p style="color:#666;margin-bottom:24px;line-height:1.5;">We received a request to reset your Hawk Central password. Click the button below to choose a new one. This link expires in <strong>1 hour</strong>.</p>
-          <a href="${resetLink}" style="display:block;background:#F5C518;color:#111111;text-decoration:none;padding:16px;border-radius:10px;font-weight:700;text-align:center;font-size:16px;">Reset My Password</a>
-          <p style="color:#aaa;font-size:12px;margin-top:24px;text-align:center;">If you didn't request a password reset, you can safely ignore this email.</p>
-        </div>
-      </div>`
-    });
-    res.json({ message: 'Reset link sent!' });
-  } catch (err) { console.error('❌ Email error:', err); res.status(500).json({ error: 'Error sending reset email' }); }
+      html: `<p>Click here to reset your password:</p><a href="${resetLink}">${resetLink}</a>`
+    }).then(r => console.log("✅ Email sent:", r))
+      .catch(e => console.error("❌ Email send error:", e));
+
+    // Respond immediately without waiting for email
+    res.json({ message: 'If that email exists, a reset link has been sent.' });
+
+  } catch (err) {
+    console.error('❌ ROUTE ERROR:', err);
+    res.status(500).json({ error: 'Error sending reset email' });
+  }
 });
 
+// RESET PASSWORD
 app.post('/reset-password', async (req, res) => {
   try {
-    const { token, new_password } = req.body;
-    if (!token || !new_password) return res.status(400).json({ error: 'Token and new password required' });
-    const result = await pool.query('SELECT * FROM users WHERE reset_token=$1 AND reset_token_expiry > NOW()', [token]);
-    if (result.rows.length === 0) return res.status(400).json({ error: 'Invalid or expired reset token' });
-    const password_hash = await bcrypt.hash(new_password, 12);
-    await pool.query('UPDATE users SET password_hash=$1, reset_token=NULL, reset_token_expiry=NULL WHERE user_id=$2', [password_hash, result.rows[0].user_id]);
-    res.json({ message: 'Password reset successful' });
-  } catch (err) { res.status(500).json({ error: 'Error resetting password' }); }
+    const { token, new_password: password } = req.body;
+    if (!token || !password) return res.status(400).json({ error: 'Missing token or password' });
+
+    const result = await pool.query(
+      'SELECT * FROM users WHERE reset_token=$1 AND reset_token_expiry > NOW()',
+      [token]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired reset token' });
+    }
+
+    const password_hash = await bcrypt.hash(password, 12);
+
+    await pool.query(
+      'UPDATE users SET password_hash=$1, reset_token=NULL, reset_token_expiry=NULL WHERE reset_token=$2',
+      [password_hash, token]
+    );
+
+    res.json({ message: 'Password reset successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error resetting password' });
+  }
 });
 
 // FEATURED
